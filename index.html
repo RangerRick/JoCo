@@ -1,0 +1,114 @@
+<!DOCTYPE html> 
+<html> 
+	<head> 
+	<title>My Page</title> 
+	<meta name="viewport" content="width=device-width, initial-scale=1"> 
+	<link rel="stylesheet" href="jquery.mobile/jquery.mobile-1.0.1.css" />
+	<script src="jquery/jquery-1.7.1.js"></script>
+	<script src="jquery.mobile/jquery.mobile-1.0.1.js"></script>
+	<script type="text/javascript">
+
+	var data = [];
+
+	// dateFormat.masks.joco = 'ddd, mmm d hh:MMTT';
+	function formatTime(d) {
+		var hour = String('0' + (d.getHours() % 12)).slice(-2);
+		if (hour == '00') {
+			hour = '12';
+		}
+		var ret = hour + ':' + String('0' + d.getMinutes()).slice(-2);
+		if ((d.getHours() % 12) == d.getHours()) {
+			ret += 'AM';
+		} else {
+			ret += 'PM';
+		}
+		return ret;
+	}
+	function formatDate(d) {
+		return d.getMonth() + '-' + d.getDate() + ', ' + formatTime(d);
+	}
+
+	function supports_html5_storage() {
+		try {
+			return 'localStorage' in window && window['localStorage'] !== null;
+		} catch (e) {
+			return false;
+		}
+	}
+	
+	function supports_json() {
+		try {
+			return 'JSON' in window && window['JSON'] !== null;
+		} catch (e) {
+			return false;
+		}
+	}
+
+	function refresh() {
+		var html = "";
+
+		$.each(get(), function(i, entry) {
+			var start = undefined;
+			var end   = undefined;
+
+			html += '<li><a href"#"><h3>'
+				+ entry.title['$t']
+				+ '</h3>';
+
+			if (entry['gd$when']) {
+				start = new Date(entry['gd$when'][0].startTime);
+				end   = new Date(entry['gd$when'][0].endTime);
+
+				html += '<p>' + formatDate(start) + '-' + formatTime(end) + '</p>';
+			}
+
+			html += '<p>' + entry.content['$t'] + '</p>'
+				+ '</a></li>';
+
+		});
+
+		$('#entry-list').html(html);
+	}
+
+	function get() {
+		if (supports_html5_storage() && supports_json()) {
+			return window.JSON.parse(localStorage.getItem("cache"));
+		} else {
+			return data;
+		}
+	}
+	
+	function save(obj) {
+		if (supports_html5_storage() && supports_json()) {
+			localStorage.setItem("cache", window.JSON.stringify(obj));
+		} else {
+			data = obj;
+		}
+	}
+
+	$.getJSON("http://www.google.com/calendar/feeds/nh76o8dgn9d86b7n3p3uofg1q0%40group.calendar.google.com/public/full?alt=json-in-script&futureevents=true&orderby=starttime&sortorder=ascending&callback=?",
+		function(json) {
+			save(json.feed.entry);
+			refresh();
+		}
+	);
+	
+	</script>
+</head> 
+<body> 
+
+<div data-role="page">
+
+	<div data-role="header">
+		<h1>My Title</h1>
+	</div><!-- /header -->
+
+	<div data-role="content">	
+		<ul data-role="listview" gdata-filter="true" id="entry-list">
+		</ul>
+	</div><!-- /content -->
+
+</div><!-- /page -->
+
+</body>
+</html>
