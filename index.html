@@ -54,12 +54,12 @@
 
 	// dateFormat.masks.joco = 'ddd, mmm d hh:MMTT';
 	function formatTime(d) {
-		var hour = String('0' + (d.getHours() % 12)).slice(-2);
+		var hour = String('0' + (d.getUTCHours() % 12)).slice(-2);
 		if (hour == '00') {
 			hour = '12';
 		}
-		var ret = hour + ':' + String('0' + d.getMinutes()).slice(-2);
-		if ((d.getHours() % 12) == d.getHours()) {
+		var ret = hour + ':' + String('0' + d.getUTCMinutes()).slice(-2);
+		if ((d.getUTCHours() % 12) == d.getUTCHours()) {
 			ret += 'AM';
 		} else {
 			ret += 'PM';
@@ -69,7 +69,12 @@
 
 	function formatDate(d) {
 		// console.log("month = " + d.getMonth());
-		return months[d.getMonth()] + ' ' + d.getDate();
+		return months[d.getUTCMonth()] + ' ' + d.getUTCDate();
+	}
+
+	function getDateFromString(dateString) {
+		// we retrieve in UTC, but the calendar schedule is set in EST (-05:00)
+		return new Date((new Date(dateString)).valueOf() - (60 * 60 * 5 * 1000));
 	}
 
 	function refresh() {
@@ -81,14 +86,9 @@
 			var content = entry.content['$t'];
 
 			if (entry['gd$when']) {
-				var startTime = entry['gd$when'][0].startTime.replace('.000-', '-');
-				var endTime   = entry['gd$when'][0].endTime.replace('.000-', '-');
+				var start = getDateFromString(entry['gd$when'][0].startTime.replace('.000-', '-'));
+				var end   = getDateFromString(entry['gd$when'][0].endTime.replace('.000-', '-'));
 				
-				// console.log("startTime = " + startTime + ", endTime = " + endTime);
-
-				var start     = new Date(startTime);
-				var end       = new Date(endTime);
-
 				var startDate = formatDate(start);
 				if (last_date != startDate) {
 					html += '<li data-role="list-divider">' + startDate + '</li>' + "\n";
@@ -131,6 +131,7 @@
 				"http://www.google.com/calendar/feeds/"
 				+ "nh76o8dgn9d86b7n3p3uofg1q0%40group.calendar.google.com"
 				+ "/public/full?alt=json-in-script"
+				+ "&ctz=Etc/UTC"
 				+ "&orderby=starttime"
 				+ "&sortorder=ascending"
 				+ "&max-results=10000"
@@ -164,11 +165,9 @@
 				type: "GET",
 				url: "http://www.raccoonfink.com/joco/online.html",
 				success: function (data, status, req) {
-					console.log("success");
 					updateData();
 				},
 				error: function (req, status, ex) {
-					console.log("error");
 					if (jocoOnline) {
 						updateData();
 						return;
