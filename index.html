@@ -135,20 +135,24 @@
 	});
 
 	function updateData() {
-		console.log("update data");
-		$.getJSON(
-			"http://www.google.com/calendar/feeds/"
-			+ "nh76o8dgn9d86b7n3p3uofg1q0%40group.calendar.google.com"
-			+ "/public/full?alt=json-in-script"
-			+ "&futureevents=true"
-			+ "&orderby=starttime"
-			+ "&sortorder=ascending"
-			+ "&callback=?",
-			function(json) {
-				save(json.feed.entry);
-				refresh();
-			}
-		);
+		console.log("update data (online = " + jocoOnline + ")");
+		if (jocoOnline) {
+			$.getJSON(
+				"http://www.google.com/calendar/feeds/"
+				+ "nh76o8dgn9d86b7n3p3uofg1q0%40group.calendar.google.com"
+				+ "/public/full?alt=json-in-script"
+				+ "&futureevents=true"
+				+ "&orderby=starttime"
+				+ "&sortorder=ascending"
+				+ "&callback=?",
+				function(json) {
+					save(json.feed.entry);
+					refresh();
+				}
+			);
+		} else {
+			refresh();
+		}
 	}
 
 	function checkOnline() {
@@ -172,9 +176,8 @@
 					updateData();
 				},
 				error: function (req, status, ex) {
-					console.log("online = " + jocoOnline);
-					if (req.status == 200) {
-						console.log("error");
+					console.log("error");
+					if (jocoOnline) {
 						updateData();
 						return;
 					}
