@@ -45,6 +45,8 @@
       console.log("Window reloaded");
   }, false);
 
+	var jocoOnline = false;
+
 	var data = [];
 
 	var months = [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ];
@@ -150,6 +152,8 @@
 	}
 
 	function checkOnline() {
+		jocoOnline = false;
+
 		if (navigator.onLine) {
 			// Just because the browser says we're online doesn't mean we're online. The browser lies.
 			// Check to see if we are really online by making a call for a static JSON resource on
@@ -162,12 +166,13 @@
 				dataType: "jsonp",
 				timeout: 5000,
 				type: "GET",
-				url: "http://ranger.befunk.com/temp/JoCo/empty.txt",
+				url: "http://ranger.befunk.com/temp/JoCo/online.html",
 				success: function (data, status, req) {
 					console.log("success");
 					updateData();
 				},
 				error: function (req, status, ex) {
+					console.log("online = " + jocoOnline);
 					if (req.status == 200) {
 						console.log("error");
 						updateData();
