@@ -68,6 +68,7 @@
 	}
 
 	function formatDate(d) {
+		// console.log("month = " + d.getMonth());
 		return months[d.getMonth() - 1] + ' ' + d.getDate();
 	}
 
@@ -80,8 +81,13 @@
 			var content = entry.content['$t'];
 
 			if (entry['gd$when']) {
-				var start = new Date(entry['gd$when'][0].startTime);
-				var end   = new Date(entry['gd$when'][0].endTime);
+				var startTime = entry['gd$when'][0].startTime.replace('.000-', '-');
+				var endTime   = entry['gd$when'][0].endTime.replace('.000-', '-');
+				
+				// console.log("startTime = " + startTime + ", endTime = " + endTime);
+
+				var start     = new Date(startTime);
+				var end       = new Date(endTime);
 
 				var startDate = formatDate(start);
 				if (last_date != startDate) {
@@ -106,27 +112,10 @@
 
 	function get() {
 		return $.Storage.loadItem("cache");
-		/*
-		var retval;
-		if (supports_html5_storage() && supports_json()) {
-			retval = window.JSON.parse(localStorage.getItem("cache"));
-		} else {
-			retval = data;
-		}
-		// console.log("retval = " + retval);
-		return retval;
-		*/
 	}
 	
 	function save(obj) {
 		return $.Storage.saveItem("cache", obj);
-		/*
-		if (supports_html5_storage() && supports_json()) {
-			localStorage.setItem("cache", window.JSON.stringify(obj));
-		} else {
-			data = obj;
-		}
-		*/
 	}
 
 	$(document).ready(function () {//debugger;
@@ -142,11 +131,13 @@
 				"http://www.google.com/calendar/feeds/"
 				+ "nh76o8dgn9d86b7n3p3uofg1q0%40group.calendar.google.com"
 				+ "/public/full?alt=json-in-script"
-				+ "&futureevents=true"
 				+ "&orderby=starttime"
 				+ "&sortorder=ascending"
+				+ "&max-results=10000"
+				+ "&start-min=2012-01-01T00:00:00-05:00"
 				+ "&callback=?",
 				function(json) {
+					// console.log(window.JSON.stringify(json));
 					save(json.feed.entry);
 					refresh();
 				}
