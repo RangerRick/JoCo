@@ -168,8 +168,8 @@
 					updateData();
 				},
 				error: function (req, status, ex) {
-					console.log("error");
 					if (req.status == 200) {
+						console.log("error");
 						updateData();
 						return;
 					}
