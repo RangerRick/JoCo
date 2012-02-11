@@ -1,5 +1,5 @@
 <!DOCTYPE html> 
-<html> 
+<html manifest="joco.appcache"> 
 	<head> 
 	<title>JoCo Cruise Crazy II</title> 
 	<meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -13,7 +13,37 @@
 	</style>
 	<script src="jquery/jquery-1.7.1.js"></script>
 	<script src="jquery.mobile/jquery.mobile-1.0.1.js"></script>
+	<script src="jquery.Storage/jquery.Storage.js"></script>
 	<script type="text/javascript">
+
+  var cache = window.applicationCache;
+
+  cache.addEventListener("cached", function () {
+      console.log("All resources for this web app have now been downloaded. You can run this application while not connected to the internet");
+  }, false);
+  cache.addEventListener("checking", function () {
+      console.log("Checking manifest");
+  }, false);
+  cache.addEventListener("downloading", function () {
+      console.log("Starting download of cached files");
+  }, false);
+  cache.addEventListener("error", function (e) {
+      console.log("There was an error in the manifest, downloading cached files or you're offline: " + e);
+  }, false);
+  cache.addEventListener("noupdate", function () {
+      console.log("There was no update needed");
+  }, false);
+  cache.addEventListener("progress", function () {
+      console.log("Downloading cached files");
+  }, false);
+  cache.addEventListener("updateready", function () {
+      cache.swapCache();
+      console.log("Updated cache is ready");
+      // Even after swapping the cache the currently loaded page won't use it
+      // until it is reloaded, so force a reload so it is current.
+      window.location.reload(true);
+      console.log("Window reloaded");
+  }, false);
 
 	var data = [];
 
@@ -36,30 +66,6 @@
 
 	function formatDate(d) {
 		return months[d.getMonth() - 1] + ' ' + d.getDate();
-	}
-
-	function supports_html5_storage() {
-		try {
-			if('localStorage' in window && window['localStorage'] !== null) {
-				// console.log("yes HTML5 storage");
-				return true;
-			}
-		} catch (e) {
-		}
-		// console.log("no HTML5 storage");
-		return false;
-	}
-	
-	function supports_json() {
-		try {
-			if ('JSON' in window && window['JSON'] !== null) {
-				// console.log("yes JSON");
-				return true;
-			}
-		} catch (e) {
-		}
-		// console.log("no JSON");
-		return false;
 	}
 
 	function refresh() {
@@ -96,32 +102,80 @@
 	}
 
 	function get() {
+		return $.Storage.loadItem("cache");
+		/*
 		var retval;
 		if (supports_html5_storage() && supports_json()) {
 			retval = window.JSON.parse(localStorage.getItem("cache"));
 		} else {
 			retval = data;
 		}
-		console.log("retval = " + retval);
+		// console.log("retval = " + retval);
 		return retval;
+		*/
 	}
 	
 	function save(obj) {
+		return $.Storage.saveItem("cache", obj);
+		/*
 		if (supports_html5_storage() && supports_json()) {
 			localStorage.setItem("cache", window.JSON.stringify(obj));
 		} else {
 			data = obj;
 		}
+		*/
 	}
 
-	$.getJSON("http://www.google.com/calendar/feeds/nh76o8dgn9d86b7n3p3uofg1q0%40group.calendar.google.com/public/full?alt=json-in-script&futureevents=true&orderby=starttime&sortorder=ascending&callback=?",
-		function(json) {
-			save(json.feed.entry);
+	$(document).ready(function () {//debugger;
+	    $(document.body).bind("online", updateData);
+	    $(document.body).bind("offline", updateData);
+	    updateData();
+	});
+
+	function updateData() {
+		if (navigator.onLine) {
+			// Just because the browser says we're online doesn't mean we're online. The browser lies.
+			// Check to see if we are really online by making a call for a static JSON resource on
+			// the originating Web site. If we can get to it, we're online. If not, assume we're
+			// offline.
+			$.ajaxSetup({
+				async: true,
+				cache: false,
+				context: $("#status"),
+				dataType: "jsonp",
+				timeout: 5000,
+				type: "GET",
+				url: "http://ranger.befunk.com/temp/JoCo/empty.txt",
+				error: function (req, status, ex) {
+					console.log("Error: request = " + window.JSON.stringify(req) + ", status = " + status + ", ex = " + ex);
+					// We might not be technically "offline" if the error is not a timeout, but
+					// otherwise we're getting some sort of error when we shouldn't, so we're
+					// going to treat it as if we're offline.
+					// Note: This might not be totally correct if the error is because the
+					// manifest is ill-formed.
+					refresh();
+				},
+				success: function (data, status, req) {
+					$.getJSON(
+						"http://www.google.com/calendar/feeds/"
+						+ "nh76o8dgn9d86b7n3p3uofg1q0%40group.calendar.google.com"
+						+ "/public/full?alt=json-in-script"
+						+ "&futureevents=true"
+						+ "&orderby=starttime"
+						+ "&sortorder=ascending"
+						+ "&callback=?",
+						function(json) {
+							save(json.feed.entry);
+							refresh();
+						}
+					);
+				}
+			});
+			$.ajax();
+		} else {
 			refresh();
 		}
-	)
-	.error(function() { refresh(); });
-	
+	}
 	</script>
 </head> 
 <body> 
@@ -139,5 +193,6 @@
 
 </div><!-- /page -->
 
+<div id="status"></div>
 </body>
 </html>
