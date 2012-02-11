@@ -4,6 +4,7 @@ CACHE MANIFEST
 # Explicitly cached 'master entries'.
 CACHE:
 index.html
+online.html
 empty.txt
 jquery/jquery-1.7.1.js
 jquery/jquery-1.7.1.min.js
