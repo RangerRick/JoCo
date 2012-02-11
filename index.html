@@ -1,14 +1,23 @@
 <!DOCTYPE html> 
 <html> 
 	<head> 
-	<title>My Page</title> 
+	<title>JoCo Cruise Crazy II</title> 
 	<meta name="viewport" content="width=device-width, initial-scale=1"> 
 	<link rel="stylesheet" href="jquery.mobile/jquery.mobile-1.0.1.css" />
+	<style type="text/css">
+		.timespan {
+			font-family: monospace;
+			margin-right: 15px;
+			font-size: smaller;
+		}
+	</style>
 	<script src="jquery/jquery-1.7.1.js"></script>
 	<script src="jquery.mobile/jquery.mobile-1.0.1.js"></script>
 	<script type="text/javascript">
 
 	var data = [];
+
+	var months = [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ];
 
 	// dateFormat.masks.joco = 'ddd, mmm d hh:MMTT';
 	function formatTime(d) {
@@ -24,58 +33,77 @@
 		}
 		return ret;
 	}
+
 	function formatDate(d) {
-		return d.getMonth() + '-' + d.getDate() + ', ' + formatTime(d);
+		return months[d.getMonth() - 1] + ' ' + d.getDate();
 	}
 
 	function supports_html5_storage() {
 		try {
-			return 'localStorage' in window && window['localStorage'] !== null;
+			if('localStorage' in window && window['localStorage'] !== null) {
+				// console.log("yes HTML5 storage");
+				return true;
+			}
 		} catch (e) {
-			return false;
 		}
+		// console.log("no HTML5 storage");
+		return false;
 	}
 	
 	function supports_json() {
 		try {
-			return 'JSON' in window && window['JSON'] !== null;
+			if ('JSON' in window && window['JSON'] !== null) {
+				// console.log("yes JSON");
+				return true;
+			}
 		} catch (e) {
-			return false;
 		}
+		// console.log("no JSON");
+		return false;
 	}
 
 	function refresh() {
 		var html = "";
+		var last_date = "";
 
 		$.each(get(), function(i, entry) {
-			var start = undefined;
-			var end   = undefined;
-
-			html += '<li><a href"#"><h3>'
-				+ entry.title['$t']
-				+ '</h3>';
+			var header = entry.title['$t'];
+			var content = entry.content['$t'];
 
 			if (entry['gd$when']) {
-				start = new Date(entry['gd$when'][0].startTime);
-				end   = new Date(entry['gd$when'][0].endTime);
+				var start = new Date(entry['gd$when'][0].startTime);
+				var end   = new Date(entry['gd$when'][0].endTime);
 
-				html += '<p>' + formatDate(start) + '-' + formatTime(end) + '</p>';
+				var startDate = formatDate(start);
+				if (last_date != startDate) {
+					html += '<li data-role="list-divider">' + startDate + '</li>' + "\n";
+					last_date = startDate;
+				}
+				
+				header += '<br /><span class="timespan">' + formatTime(start) + '-' + formatTime(end) + '</span>';
 			}
 
-			html += '<p>' + entry.content['$t'] + '</p>'
-				+ '</a></li>';
-
+			html += '<li>' + "\n" +
+				'<div>' + "\n"
+				+ '<h3>' + header + '</h3>' + "\n"
+				+ '<p style="white-space:normal">' + content + '</p>' + "\n"
+				+ '</div>' + "\n"
+				+ '</li>' + "\n";
 		});
 
 		$('#entry-list').html(html);
+		$('#entry-list').listview('refresh');
 	}
 
 	function get() {
+		var retval;
 		if (supports_html5_storage() && supports_json()) {
-			return window.JSON.parse(localStorage.getItem("cache"));
+			retval = window.JSON.parse(localStorage.getItem("cache"));
 		} else {
-			return data;
+			retval = data;
 		}
+		console.log("retval = " + retval);
+		return retval;
 	}
 	
 	function save(obj) {
@@ -91,7 +119,8 @@
 			save(json.feed.entry);
 			refresh();
 		}
-	);
+	)
+	.error(function() { refresh(); });
 	
 	</script>
 </head> 
@@ -100,11 +129,11 @@
 <div data-role="page">
 
 	<div data-role="header">
-		<h1>My Title</h1>
+		<h1>JoCo Cruise Crazy II</h1>
 	</div><!-- /header -->
 
 	<div data-role="content">	
-		<ul data-role="listview" gdata-filter="true" id="entry-list">
+		<ul id="entry-list" data-role="listview" data-filter="true" data-inset="true">
 		</ul>
 	</div><!-- /content -->
 
