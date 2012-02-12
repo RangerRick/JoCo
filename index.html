@@ -108,7 +108,7 @@
 		var last_date = '';
 		var type = getType();
 		
-		// console.log('type = ' + type);
+		console.log('type = ' + type);
 
 		$.each(get(type), function(i, entry) {
 			var header = entry.title['$t'];
@@ -143,11 +143,13 @@
 		try {
 			return $.Storage.loadItem(name);
 		} catch (e) {
+			console.log("failed to get " + name);
 			return undefined;
 		}
 	}
 	
 	function save(name, obj) {
+		// console.log("save name=" + name + ", obj = " + window.JSON.stringify(obj));
 		return $.Storage.saveItem(name, obj);
 	}
 
@@ -166,7 +168,7 @@
 				+ "&callback=?",
 				function(json) {
 					// console.log(window.JSON.stringify(json));
-					save("official", json.feed.entry);
+					save('official', json.feed.entry);
 					refresh();
 				}
 			);
@@ -182,7 +184,7 @@
 				+ "&callback=?",
 				function(json) {
 					// console.log(window.JSON.stringify(json));
-					save("unofficial", json.feed.entry);
+					save('unofficial', json.feed.entry);
 					refresh();
 				}
 			);
