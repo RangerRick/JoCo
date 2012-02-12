@@ -4,7 +4,6 @@ CACHE MANIFEST
 # Explicitly cached 'master entries'.
 CACHE:
 index.html
-online.html
 jquery/jquery-1.7.1.js
 jquery/jquery-1.7.1.min.js
 jquery.mobile/images/ajax-loader.png
@@ -19,3 +18,6 @@ jquery.mobile/jquery.mobile-1.0.1.min.js
 jquery.mobile/jquery.mobile.structure-1.0.1.css
 jquery.mobile/jquery.mobile.structure-1.0.1.min.css
 jquery.Storage/jquery.Storage.js
+
+NETWORK:
+online.html
