@@ -79,11 +79,38 @@
 		return new Date((new Date(dateString)).valueOf() - (60 * 60 * 5 * 1000));
 	}
 
-	function refresh() {
-		var html = "";
-		var last_date = "";
+	/*
+	<input type="radio" name="type-choice" id="type-choice-official"   value="official" checked="checked" />
+	<label for="type-choice-official">Official</label>
+	<input type="radio" name="type-choice" id="type-choice-unofficial" value="unofficial" />
+	*/
 
-		$.each(get(), function(i, entry) {
+	function setType(type) {
+		if (type == undefined) {
+			type = $("input[name='type-choice']:checked").val();
+		}
+		// console.log("setType value = " + type);
+		save('calendarType', type);
+		refresh();
+		return true;
+	}
+	
+	function getType() {
+		var type = get('calendarType');
+		if (type == 'official' || type == 'unofficial') {
+			return type;
+		}
+		return 'official';
+	}
+
+	function refresh() {
+		var html = '';
+		var last_date = '';
+		var type = getType();
+		
+		// console.log('type = ' + type);
+
+		$.each(get(type), function(i, entry) {
 			var header = entry.title['$t'];
 			var content = entry.content['$t'];
 
@@ -112,19 +139,17 @@
 		$('#entry-list').listview('refresh');
 	}
 
-	function get() {
-		return $.Storage.loadItem("cache");
+	function get(name) {
+		try {
+			return $.Storage.loadItem(name);
+		} catch (e) {
+			return undefined;
+		}
 	}
 	
-	function save(obj) {
-		return $.Storage.saveItem("cache", obj);
+	function save(name, obj) {
+		return $.Storage.saveItem(name, obj);
 	}
-
-	$(document).ready(function () {//debugger;
-	    $(document.body).bind("online", checkOnline);
-	    $(document.body).bind("offline", checkOnline);
-	    checkOnline();
-	});
 
 	function updateData() {
 		console.log("update data (online = " + jocoOnline + ")");
@@ -141,7 +166,23 @@
 				+ "&callback=?",
 				function(json) {
 					// console.log(window.JSON.stringify(json));
-					save(json.feed.entry);
+					save("official", json.feed.entry);
+					refresh();
+				}
+			);
+			$.getJSON(
+				"https://www.google.com/calendar/feeds/"
+				+ "6r0c1f3ltnhdlpbtpql79colos%40group.calendar.google.com"
+				+ "/public/full?alt=json-in-script"
+				+ "&ctz=Etc/UTC"
+				+ "&orderby=starttime"
+				+ "&sortorder=ascending"
+				+ "&max-results=10000"
+				+ "&start-min=2012-01-01T00:00:00-05:00"
+				+ "&callback=?",
+				function(json) {
+					// console.log(window.JSON.stringify(json));
+					save("unofficial", json.feed.entry);
 					refresh();
 				}
 			);
@@ -188,17 +229,29 @@
 			refresh();
 		}
 	}
+	
+	$(document).ready(function () {//debugger;
+		setType('official');
+		$(document.body).bind("online", checkOnline);
+		$(document.body).bind("offline", checkOnline);
+		checkOnline();
+	});
+
 	</script>
 </head> 
 <body> 
 
 <div data-role="page">
 
-	<!--
 	<div data-role="header">
-		<h1>JoCo Cruise Crazy II</h1>
+		<h1 style="text-align:left; margin-left:10px">JoCo Schedule</h1>
+		<form id="chooser" data-role="controlgroup" data-type="horizontal" style="display:inline; margin-top:-5px; padding-top:0" class="ui-btn-right">
+			<input type="radio" name="type-choice" id="type-choice-official"   value="official" checked="checked" onclick="javascript:setType('official');" />
+			<label for="type-choice-official">Official</label>
+			<input type="radio" name="type-choice" id="type-choice-unofficial" value="unofficial" onclick="javascript:setType('unofficial');" />
+			<label for="type-choice-unofficial">Unofficial</label>
+		</form>
 	</div>
-	-->
 
 	<div data-role="content">	
 		<ul id="entry-list" data-role="listview" data-filter="true" data-inset="true">
