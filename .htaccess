@@ -1,1 +1,6 @@
+ExpiresActive On
+
 AddType text/cache-manifest .appcache
+<Files ~ "\.appcache$">
+	ExpiresDefault "access"
+</Files>
