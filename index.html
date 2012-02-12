@@ -53,7 +53,8 @@
 	var jocoOnline = false;
 
 	var data = [];
-
+	var pendingUpdates = [];
+	
 	var months = [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ];
 
 	// dateFormat.masks.joco = 'ddd, mmm d hh:MMTT';
@@ -155,44 +156,51 @@
 		return $.Storage.saveItem(name, obj);
 	}
 
-	function updateData() {
-		console.log("update data (online = " + jocoOnline + ")");
-		if (jocoOnline) {
-			$.getJSON(
-				"http://www.google.com/calendar/feeds/"
-				+ "nh76o8dgn9d86b7n3p3uofg1q0%40group.calendar.google.com"
-				+ "/public/full?alt=json-in-script"
-				+ "&ctz=Etc/UTC"
-				+ "&orderby=starttime"
-				+ "&sortorder=ascending"
-				+ "&max-results=10000"
-				+ "&start-min=2012-01-01T00:00:00-05:00"
-				+ "&callback=?",
-				function(json) {
-					// console.log(window.JSON.stringify(json));
-					save('official', json.feed.entry);
-					refresh();
-				}
-			);
-			$.getJSON(
-				"https://www.google.com/calendar/feeds/"
-				+ "6r0c1f3ltnhdlpbtpql79colos%40group.calendar.google.com"
-				+ "/public/full?alt=json-in-script"
-				+ "&ctz=Etc/UTC"
-				+ "&orderby=starttime"
-				+ "&sortorder=ascending"
-				+ "&max-results=10000"
-				+ "&start-min=2012-01-01T00:00:00-05:00"
-				+ "&callback=?",
-				function(json) {
-					// console.log(window.JSON.stringify(json));
-					save('unofficial', json.feed.entry);
-					refresh();
-				}
-			);
+	function handlePendingUpdates() {
+		if (pendingUpdates.length > 0) {
+			if (jocoOnline) {
+				var update = pendingUpdates.shift();
+				console.log("handlePendingUpdates: update = " + update.name + ", URL = " + update.url);
+				$.getJSON(update.url,
+					function(json) {
+						// console.log(window.JSON.stringify(json));
+						save(update.name, json.feed.entry);
+						handlePendingUpdates();
+					}
+				);
+			} else {
+				console.log("handlePendingUpdates: updates needed, but we are offline");
+			}
 		} else {
+			console.log("handlePendingUpdates: no more updates needed");
 			refresh();
 		}
+	}
+	
+	function updateData() {
+		pendingUpdates.push({name:"official", url:
+			"http://www.google.com/calendar/feeds/"
+			+ "nh76o8dgn9d86b7n3p3uofg1q0%40group.calendar.google.com"
+			+ "/public/full?alt=json-in-script"
+			+ "&ctz=Etc/UTC"
+			+ "&orderby=starttime"
+			+ "&sortorder=ascending"
+			+ "&max-results=10000"
+			+ "&start-min=2012-01-01T00:00:00-05:00"
+			+ "&callback=?"
+		});
+		pendingUpdates.push({name:"unofficial", url:
+			"https://www.google.com/calendar/feeds/"
+			+ "6r0c1f3ltnhdlpbtpql79colos%40group.calendar.google.com"
+			+ "/public/full?alt=json-in-script"
+			+ "&ctz=Etc/UTC"
+			+ "&orderby=starttime"
+			+ "&sortorder=ascending"
+			+ "&max-results=10000"
+			+ "&start-min=2012-01-01T00:00:00-05:00"
+			+ "&callback=?"
+		});
+		handlePendingUpdates();
 	}
 
 	function checkOnline() {
