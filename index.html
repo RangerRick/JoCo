@@ -87,6 +87,11 @@
 	<input type="radio" name="type-choice" id="type-choice-unofficial" value="unofficial" />
 	*/
 
+	function updateType(type) {
+		setType(type);
+		refresh();
+		return true;
+	}
 	function setType(type) {
 		if (type == undefined) {
 			type = $("input[name='type-choice']:checked").val();
@@ -279,9 +284,9 @@
 		<a href="#menu" data-rel="back" data-icon="arrow-l" data-direction="reverse">Back</a>
 		<h1 style="text-align:left; margin-left:10px"></h1>
 		<form id="chooser" data-role="controlgroup" data-type="horizontal" style="display:inline; margin-top:-5px; padding-top:0" class="ui-btn-right">
-			<input type="radio" name="type-choice" id="type-choice-official"   value="official" checked="checked" onclick="javascript:setType('official');" />
+			<input type="radio" name="type-choice" id="type-choice-official"   value="official" checked="checked" onclick="javascript:updateType('official');" />
 			<label for="type-choice-official">Official</label>
-			<input type="radio" name="type-choice" id="type-choice-unofficial" value="unofficial" onclick="javascript:setType('unofficial');" />
+			<input type="radio" name="type-choice" id="type-choice-unofficial" value="unofficial" onclick="javascript:updateType('unofficial');" />
 			<label for="type-choice-unofficial">Unofficial</label>
 		</form>
 	</div>
@@ -313,7 +318,7 @@
 			<option value="westerdam-02-lower-promenade.gif"         >02 - Lower Promenade</option>
 			<option value="westerdam-01-main.gif"                    >01 - Main Deck</option>
 		</select>
-		<img src="images/westerdam-09-lido.gif" id="select-westerdam-image" />
+		<img src="images/westerdam-09-lido.gif" id="select-westerdam-image" style="width:100%" />
 	</div>
 </div>
 
