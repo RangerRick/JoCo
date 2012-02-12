@@ -35,9 +35,11 @@
     cache.addEventListener("noupdate", function () {
         console.log("There was no update needed");
     }, false);
+		/*
     cache.addEventListener("progress", function () {
         console.log("Downloading cached files");
     }, false);
+		*/
     cache.addEventListener("updateready", function () {
         cache.swapCache();
         console.log("Updated cache is ready");
