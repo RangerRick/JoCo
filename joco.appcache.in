@@ -19,6 +19,9 @@ jquery.mobile/jquery.mobile.structure-1.0.1.css
 jquery.mobile/jquery.mobile.structure-1.0.1.min.css
 jquery.Storage/jquery.Storage.js
 
+FALLBACK:
+online.html offline.html
+
 NETWORK:
 online.html
-http://www.google.com/
+*
