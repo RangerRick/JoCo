@@ -1,7 +1,6 @@
 CACHE MANIFEST
 # @GITHASH@ @DATE@
 
-# Explicitly cached 'master entries'.
 CACHE:
 index.html
 offline.html
