@@ -4,6 +4,17 @@ CACHE MANIFEST
 CACHE:
 index.html
 offline.html
+images/westerdam-01-main.gif
+images/westerdam-02-lower-promenade.gif
+images/westerdam-03-promenade.gif
+images/westerdam-04-upper-promenade.gif
+images/westerdam-05-verandah.gif
+images/westerdam-06-upper-verandah.gif
+images/westerdam-07-rotterdam.gif
+images/westerdam-08-navigation.gif
+images/westerdam-09-lido.gif
+images/westerdam-10-observation.gif
+images/westerdam-11-sports.gif
 jquery/jquery-1.7.1.js
 jquery/jquery-1.7.1.min.js
 jquery.mobile/images/ajax-loader.png
