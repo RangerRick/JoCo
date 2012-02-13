@@ -164,8 +164,8 @@
 
 	function handlePendingUpdates() {
 		if (pendingUpdates.length > 0) {
+			var update = pendingUpdates.shift();
 			if (jocoOnline) {
-				var update = pendingUpdates.shift();
 				console.log("handlePendingUpdates: update = " + update.name + ", URL = " + update.url);
 				$.getJSON(update.url,
 					function(json) {
@@ -179,11 +179,13 @@
 			}
 		} else {
 			console.log("handlePendingUpdates: no more updates needed");
+			$.mobile.hidePageLoadingMsg();
 			refresh();
 		}
 	}
 	
 	function updateData() {
+		$.mobile.showPageLoadingMsg();
 		pendingUpdates.push({name:"official", url:
 			"http://www.google.com/calendar/feeds/"
 			+ "nh76o8dgn9d86b7n3p3uofg1q0%40group.calendar.google.com"
@@ -209,7 +211,7 @@
 		handlePendingUpdates();
 	}
 
-	function checkOnline() {
+	function updateDataIfOnline() {
 		jocoOnline = false;
 
 		if (navigator.onLine) {
@@ -254,11 +256,45 @@
 		return false;
 	}
 
-	$(document).ready(function () {
+	function onMenu() {
+		console.log("onMenu");
+		return true;
+	}
+
+	function onSchedule() {
+		console.log("onSchedule");
+		updateDataIfOnline();
+		return true;
+	}
+
+	function onMap() {
+		console.log("onMap");
+		return true;
+	}
+
+	function onDefault() {
+		console.log("onDefault");
+		return true;
+	}
+
+	$(document).bind('pageshow', function(event, data) {
+		var activePage = $.mobile.activePage.attr('id');
+		console.log('pageshow, active page = ' + activePage);
+
+		switch(activePage) {
+			case 'menu':     return onMenu();
+			case 'schedule': return onSchedule();
+			case 'map':      return onMap();
+			default:         return onDefault();
+		}
+	});
+
+	$(document).ready(function() {
 		setType('official');
-		$(document.body).bind("online", checkOnline);
-		$(document.body).bind("offline", checkOnline);
-		checkOnline();
+	});
+
+	$(document).bind('pageinit', function(event) {
+		// updateDataIfOnline();
 	});
 
 	</script>
