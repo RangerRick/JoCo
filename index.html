@@ -145,10 +145,9 @@
 				+ '</li>' + "\n";
 		});
 
-		$('#entry-list').html(html);
 		if(getCurrentPage() == 'schedule') {
-			$('#entry-list').listview('refresh');
-			// $('#entry-list').listview();
+			$('#calendar-list').html(html);
+			$('#calendar-list').listview('refresh');
 		}
 	}
 
@@ -385,8 +384,87 @@
 	
 	<div data-role="content">
 		<ul id="menu-list" data-role="listview" data-inset="true">
+			<li><a href="#amenities">Amenities</a></li>
 			<li><a href="#schedule">Schedule</a></li>
 			<li><a href="#map">Map</a></li>
+		</ul>
+	</div>
+</div>
+
+<div data-role="page" id="amenities">
+	<div data-role="header">
+		<a href="#menu" data-rel="back" data-icon="arrow-l">Back</a>
+		<h1 style="white-space:normal">Amenities</h1>
+	</div>
+	
+	<div data-role="content">	
+		<ul id="amenities-list" data-role="listview" data-filter="true" data-inset="true">
+			<li data-role="list-divider">Deck 11 - Sports Deck</li>
+			<li>Basketball Court</li>
+			<li>Observation Deck</li>
+			<li>Volleyball Court</li>
+			<li data-role="list-divider">Deck 10 - Observation Deck</li>
+			<li>Club HAL</li>
+			<li>Explorations Cafe</li>
+			<li>The Loft</li>
+			<li>Ten Forward (Crow's Nest)</li>
+			<li data-role="list-divider">Deck 9 - Lido Deck</li>
+			<li>Canaletto Restaurant</li>
+			<li>Fitness Center</li>
+			<li>The Greenhouse Spa &amp; Salon</li>
+			<li>Hydro Pool</li>
+			<li>Lido Bar</li>
+			<li>Lido Pool</li>
+			<li>Lido Restaurant</li>
+			<li>Sea View Bar</li>
+			<li>Sea View Pool</li>
+			<li>Terrace Grill</li>
+			<li>Therapy Rooms</li>
+			<li>Thermal Suites</li>
+			<li data-role="list-divider">Deck 8 - Navigation Deck</li>
+			<li>Staterooms 8001-8147</li>
+			<li data-role="list-divider">Deck 7 - Rotterdam Deck</li>
+			<li>Concierge</li>
+			<li>Neptune Lounge</li>
+			<li>Staterooms 7001-7151</li>
+			<li data-role="list-divider">Deck 6 - Upper Verandah Deck</li>
+			<li>Staterooms 6001-6177</li>
+			<li data-role="list-divider">Deck 5 - Verandah Deck</li>
+			<li>Staterooms 5001-5191</li>
+			<li data-role="list-divider">Deck 4 - Upper Promenade Deck</li>
+			<li>Staterooms 4001-4185</li>
+			<li data-role="list-divider">Deck 3 - Promenade Deck</li>
+			<li>Atrium</li>
+			<li>Erasmus Library</li>
+			<li>Half Moon (Meeting Room)</li>
+			<li>Hudson (Meeting Room)</li>
+			<li>Merabella Luxury Shop</li>
+			<li>Ocean Bar</li>
+			<li>Photo Gallery</li>
+			<li>Shopping Arcade</li>
+			<li>Shops</li>
+			<li>Stuyvesant (Meeting Room)</li>
+			<li>Upper Vista Dining Room</li>
+			<li>Vista Lounge Balcony</li>
+			<li data-role="list-divider">Deck 2 - Lower Promenade Deck</li>
+			<li>Atrium</li>
+			<li>Casino</li>
+			<li>Explorer's Lounge</li>
+			<li>Lower Vista Dining Room</li>
+			<li>Northern Lights Night Club</li>
+			<li>Piano Bar</li>
+			<li>Pinnacle Bar</li>
+			<li>Pinnacle Grill</li>
+			<li>Queen's Lounge &amp; Culinary Arts Center</li>
+			<li>Sports Bar</li>
+			<li>Vista Lounge Balcony</li>
+			<li data-role="list-divider">Deck 1 - Main Deck</li>
+			<li>Atrium</li>
+			<li>Front Office</li>
+			<li>Future Cruises</li>
+			<li>Shore Excursions</li>
+			<li>Staterooms 1001-1127</li>
+			<li>Vista Lounge</li>
 		</ul>
 	</div>
 </div>
@@ -405,7 +483,7 @@
 	</div>
 
 	<div data-role="content">	
-		<ul id="entry-list" data-role="listview" data-filter="true" data-inset="true">
+		<ul id="calendar-list" data-role="listview" data-filter="true" data-inset="true">
 			<li>loading...</li>
 		</ul>
 	</div>
