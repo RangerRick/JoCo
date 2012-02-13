@@ -111,7 +111,7 @@
 	}
 
 	function refresh() {
-		if ($.mobile.activePage.attr('id') != 'schedule') {
+		if (getCurrentPage() != 'schedule') {
 			console.log("skipping refresh, we're not on the schedule page");
 			return;
 		}
@@ -146,7 +146,7 @@
 		});
 
 		$('#entry-list').html(html);
-		if($.mobile.activePage.attr('id') == 'schedule') {
+		if(getCurrentPage() == 'schedule') {
 			$('#entry-list').listview('refresh');
 			// $('#entry-list').listview();
 		}
@@ -255,7 +255,6 @@
 	}
 
 	function updateMapImage() {
-//		alert("selected: " + $('#select-westerdam').val());
 		$('#select-westerdam-image').attr('src', 'images/' + $('#select-westerdam').val());
 		return false;
 	}
@@ -284,9 +283,35 @@
 		console.log("onDefault");
 		return true;
 	}
+	
+	function nextDeckImage() {
+		var current = $('#select-westerdam option:selected');
+		var nextObject = current.prev('option');
+		if (nextObject != undefined && nextObject.val() != undefined) {
+			// $('#swiped').html("nextDeckImage, current = " + current.val() + ", next = " + nextObject.val());
+			current.removeAttr('selected');
+			nextObject.attr('selected', 'selected');
+			$('#select-westerdam').change();
+		}
+	}
+	
+	function previousDeckImage() {
+		var current = $('#select-westerdam option:selected');
+		var previousObject = current.next('option');
+		if (previousObject != undefined && previousObject.val() != undefined) {
+			// $('#swiped').html("previousDeckImage, current = " + current.val() + ", previous = " + previousObject.val());
+			current.removeAttr('selected');
+			previousObject.attr('selected', 'selected');
+			$('#select-westerdam').change();
+		}
+	}
+	
+	function getCurrentPage() {
+		return $.mobile.activePage.attr('id');
+	}
 
 	$(document).bind('pageshow', function(event, data) {
-		var activePage = $.mobile.activePage.attr('id');
+		var activePage = getCurrentPage();
 		console.log('pageshow, active page = ' + activePage);
 
 		switch(activePage) {
@@ -298,7 +323,7 @@
 	});
 
 	$(document).bind('pagebeforehide', function(event, data) {
-		var activePage = $.mobile.activePage.attr('id');
+		var activePage = getCurrentPage();
 		console.log('pagebeforehide, active page = ' + activePage);
 
 		switch(activePage) {
@@ -309,14 +334,44 @@
 		}
 	});
 
+	$(document).bind('swipeleft', function(e, ui) {
+		alert(e.type);
+		if (getCurrentPage() == 'map') {
+			nextDeckImage();
+		}
+	});
+	$(document).bind('swiperight', function(e, ui) {
+		alert(e.type);
+		if (getCurrentPage() == 'map') {
+			previousDeckImage();
+		}
+	});
+
 	$(document).ready(function() {
+		var images = [
+			"westerdam-11-sports.gif",
+			"westerdam-10-observation.gif",
+			"westerdam-09-lido.gif",
+			"westerdam-08-navigation.gif",
+			"westerdam-07-rotterdam.gif",
+			"westerdam-06-upper-verandah.gif",
+			"westerdam-05-verandah.gif",
+			"westerdam-04-upper-promenade.gif",
+			"westerdam-03-promenade.gif",
+			"westerdam-02-lower-promenade.gif",
+			"westerdam-01-main.gif"
+		];
+		
+		$.each(images, function(i, image) {
+			document.createElement('img').src = "images/" + image;
+		});
+
 		$.mobile.defaultPageTransition = 'none';
 		setType('official');
 		updateDataIfOnline();
 		// update every 60 minutes
 		timerInterval = setInterval(updateDataIfOnline, 60 * 60 * 1000);
 	});
-
 	</script>
 </head> 
 <body> 
@@ -362,6 +417,7 @@
 	</div>
 	
 	<div data-role="content">
+		<!-- <p id="swiped">swiped</p> -->
 		<select name="select-floor" id="select-westerdam" onChange="javascript:updateMapImage();">
 			<option value="westerdam-11-sports.gif"                  >11 - Sports</option>
 			<option value="westerdam-10-observation.gif"             >10 - Observation</option>
