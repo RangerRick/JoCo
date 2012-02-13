@@ -313,7 +313,7 @@
 	});
 
 	$(document).bind('pageinit', function(event) {
-		// updateDataIfOnline();
+		$.mobile.defaultPageTransition = 'none';
 	});
 
 	</script>
@@ -322,7 +322,7 @@
 
 <div data-role="page" id="menu">
 	<div data-role="header">
-		<h1 style="white-space:normal">JoCo Cruise Crazy</h1>
+		<h1 style="white-space:normal">Cruisin'</h1>
 	</div>
 	
 	<div data-role="content">
@@ -336,7 +336,7 @@
 <div data-role="page" id="schedule">
 
 	<div data-role="header">
-		<a href="#menu" data-rel="back" data-icon="arrow-l" data-direction="reverse">Back</a>
+		<a href="#menu" data-rel="back" data-icon="arrow-l">Back</a>
 		<h1 style="text-align:left; margin-left:10px; white-space:normal"></h1>
 		<form id="chooser" data-role="controlgroup" data-type="horizontal" style="display:inline; margin-top:-5px; padding-top:0" class="ui-btn-right">
 			<input type="radio" name="type-choice" id="type-choice-official"   value="official" checked="checked" onclick="javascript:updateType('official');" />
@@ -356,7 +356,7 @@
 
 <div data-role="page" id="map">
 	<div data-role="header">
-		<a href="#menu" data-rel="back" data-icon="arrow-l" data-direction="reverse">Back</a>
+		<a href="#menu" data-rel="back" data-icon="arrow-l">Back</a>
 		<h1 style="white-space:normal">Westerdam Map</h1>
 	</div>
 	
