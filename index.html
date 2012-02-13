@@ -2,7 +2,9 @@
 <html manifest="joco.appcache"> 
 	<head> 
 	<title>JoCo</title> 
-	<meta name="viewport" content="width=device-width, user-scalable=no"> 
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black" />
 	<link rel="stylesheet" href="jquery.mobile/jquery.mobile-1.0.1.css" />
 	<link rel="apple-touch-icon" href="apple-touch-icon.png" />
 	<style type="text/css">
@@ -226,7 +228,6 @@
 		} else {
 			console.log("handlePendingUpdates: no more updates needed");
 			refresh();
-			// $.mobile.hidePageLoadingMsg();
 		}
 	}
 	
@@ -314,7 +315,6 @@
 
 	function onSchedule(show) {
 		console.log("onSchedule");
-		// $.mobile.showPageLoadingMsg();
 		if (show) {
 			refresh();
 			updateDataIfOnline();
@@ -361,6 +361,16 @@
 		return $.mobile.activePage.attr('id');
 	}
 
+	function freezeViewport() {
+		console.log("freezeViewport");
+		$('meta[name=viewport]').attr('content', 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no');
+	}
+
+	function unfreezeViewport() {
+		console.log("unfreezeViewport");
+		$('meta[name=viewport]').attr('content', 'width=device-width, initial-scale=1.0, user-scalable=yes');
+	}
+	
 	$(document).bind('pageshow', function(event, data) {
 		var activePage = getCurrentPage();
 		console.log('pageshow, active page = ' + activePage);
@@ -372,6 +382,23 @@
 			default:         return onDefault(true);
 		}
 	});
+
+	$('input, select, textarea').bind('focus blur',
+		function(e) {
+			$('meta[name="viewport"]').attr('content', 'width=device-width,initial-scale=1,maximum-scale=' + (e.type == 'blur' ? 10 : 1));
+			// freezeViewport();
+			// unfreezeViewport();
+		}
+	);
+
+	/*
+	var viewportMeta = $('meta[name="viewport"]');
+	$('input, select, textarea').bind('focus blur', 
+		function(event) {
+			viewportMeta.attr('content', 'width=device-width,initial-scale=1,maximum-scale=' + (event.type == 'blur' ? 10 : 1));
+		}
+	);
+	*/
 
 	$(document).bind('pagebeforehide', function(event, data) {
 		var activePage = getCurrentPage();
@@ -550,7 +577,7 @@
 </div>
 
 <div data-role="page" id="map">
-	<div data-role="header">
+	<div id="map-header" data-role="header">
 		<a href="#menu" data-rel="back" data-icon="arrow-l">Back</a>
 		<h1 style="white-space:normal">Westerdam Map</h1>
 	</div>
