@@ -60,12 +60,12 @@
 
 	// dateFormat.masks.joco = 'ddd, mmm d hh:MMTT';
 	function formatTime(d) {
-		var hour = String('0' + (d.getUTCHours() % 12)).slice(-2);
+		var hour = String('0' + (d.getHours() % 12)).slice(-2);
 		if (hour == '00') {
 			hour = '12';
 		}
-		var ret = hour + ':' + String('0' + d.getUTCMinutes()).slice(-2);
-		if ((d.getUTCHours() % 12) == d.getUTCHours()) {
+		var ret = hour + ':' + String('0' + d.getMinutes()).slice(-2);
+		if ((d.getHours() % 12) == d.getHours()) {
 			ret += 'AM';
 		} else {
 			ret += 'PM';
@@ -75,19 +75,22 @@
 
 	function formatDate(d) {
 		// console.log("month = " + d.getMonth());
-		return days[d.getUTCDay()] + ', ' + months[d.getUTCMonth()] + ' ' + d.getUTCDate();
+		return days[d.getDay()] + ', ' + months[d.getMonth()] + ' ' + d.getDate();
 	}
 
-	function getDateFromString(dateString) {
+	function getDateFromString(dateTimeString) {
 		// we retrieve in UTC, but the calendar schedule is set in EST (-05:00)
-		return new Date((new Date(dateString)).valueOf() - (60 * 60 * 5 * 1000));
+		var dateTimeParts = dateTimeString.split('T');
+		var dateParts = dateTimeParts[0].split('-');
+		var timeParts = dateTimeParts[1].split(':');
+		
+		console.log('year = ' + dateParts[0] + ', month = ' + dateParts[1] + ', day = ' + dateParts[2]);
+		console.log('hours = ' + timeParts[0] + ', minutes = ' + timeParts[1]);
+		
+		var utcDate = new Date(dateParts[0], dateParts[1], dateParts[2], timeParts[0], timeParts[1], 0, 0);
+		return utcDate;
+//		return new Date(utcDate.getTime() - (60 * 60 * 5 * 1000));
 	}
-
-	/*
-	<input type="radio" name="type-choice" id="type-choice-official"   value="official" checked="checked" />
-	<label for="type-choice-official">Official</label>
-	<input type="radio" name="type-choice" id="type-choice-unofficial" value="unofficial" />
-	*/
 
 	function updateType(type) {
 		setType(type);
@@ -194,7 +197,8 @@
 			"http://www.google.com/calendar/feeds/"
 			+ "nh76o8dgn9d86b7n3p3uofg1q0%40group.calendar.google.com"
 			+ "/public/full?alt=json-in-script"
-			+ "&ctz=Etc/UTC"
+//			+ "&ctz=Etc/UTC"
+			+ "&ctz=America/New_York"
 			+ "&orderby=starttime"
 			+ "&sortorder=ascending"
 			+ "&max-results=10000"
@@ -205,7 +209,8 @@
 			"https://www.google.com/calendar/feeds/"
 			+ "6r0c1f3ltnhdlpbtpql79colos%40group.calendar.google.com"
 			+ "/public/full?alt=json-in-script"
-			+ "&ctz=Etc/UTC"
+//			+ "&ctz=Etc/UTC"
+			+ "&ctz=America/New_York"
 			+ "&orderby=starttime"
 			+ "&sortorder=ascending"
 			+ "&max-results=10000"
