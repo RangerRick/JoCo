@@ -234,6 +234,11 @@
 	function updateDataIfOnline() {
 		jocoOnline = false;
 
+		if (pendingUpdates.length > 0) {
+			// we're already doing this; skip
+			return;
+		}
+
 		if (navigator.onLine) {
 			// Just because the browser says we're online doesn't mean we're online. The browser lies.
 			// Check to see if we are really online by making a call for a static JSON resource on
@@ -284,6 +289,7 @@
 		console.log("onSchedule");
 		// $.mobile.showPageLoadingMsg();
 		if (show) {
+			refresh();
 			updateDataIfOnline();
 		} else {
 		}
