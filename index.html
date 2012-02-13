@@ -55,6 +55,7 @@
 	var data = [];
 	var pendingUpdates = [];
 	
+	var days = [ 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' ];
 	var months = [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ];
 
 	// dateFormat.masks.joco = 'ddd, mmm d hh:MMTT';
@@ -74,7 +75,7 @@
 
 	function formatDate(d) {
 		// console.log("month = " + d.getMonth());
-		return months[d.getUTCMonth()] + ' ' + d.getUTCDate();
+		return days[d.getUTCDay()] + ', ' + months[d.getUTCMonth()] + ' ' + d.getUTCDate();
 	}
 
 	function getDateFromString(dateString) {
