@@ -1,6 +1,6 @@
 ExpiresActive On
 
 AddType text/cache-manifest .appcache
-<Files ~ "\.appcache$">
+<Files *>
 	ExpiresDefault "access"
 </Files>

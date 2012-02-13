@@ -12,6 +12,15 @@
 		.headersmall {
 			font-size: smaller;
 		}
+		.ui-grid-b .ui-block-a {
+			width: 15%;
+		}
+		.ui-grid-b .ui-block-b {
+			width: 70%;
+		}
+		.ui-grid-b .ui-block-c {
+			width: 15%;
+		}
 	</style>
 	<script src="jquery/jquery-1.7.1.js"></script>
 	<script src="jquery.mobile/jquery.mobile-1.0.1.js"></script>
@@ -179,7 +188,7 @@
 				$.getJSON(update.url,
 					function(json) {
 						// console.log(window.JSON.stringify(json));
-						// save(update.name, json.feed.entry);
+						save(update.name, json.feed.entry);
 						handlePendingUpdates();
 					}
 				);
@@ -292,6 +301,7 @@
 	}
 	
 	function nextDeckImage() {
+		if (getCurrentPage() != 'map') { return; }
 		var current = $('#select-westerdam option:selected');
 		var nextObject = current.prev('option');
 		if (nextObject != undefined && nextObject.val() != undefined) {
@@ -303,6 +313,7 @@
 	}
 	
 	function previousDeckImage() {
+		if (getCurrentPage() != 'map') { return; }
 		var current = $('#select-westerdam option:selected');
 		var previousObject = current.next('option');
 		if (previousObject != undefined && previousObject.val() != undefined) {
@@ -505,20 +516,26 @@
 	</div>
 	
 	<div data-role="content">
-		<!-- <p id="swiped">swiped</p> -->
-		<select name="select-floor" id="select-westerdam" onChange="javascript:updateMapImage();">
-			<option value="westerdam-11-sports.gif"                  >11 - Sports</option>
-			<option value="westerdam-10-observation.gif"             >10 - Observation</option>
-			<option value="westerdam-09-lido.gif" selected="selected">09 - Lido</option>
-			<option value="westerdam-08-navigation.gif"              >08 - Navigation</option>
-			<option value="westerdam-07-rotterdam.gif"               >07 - Rotterdam</option>
-			<option value="westerdam-06-upper-verandah.gif"          >06 - Upper Verandah</option>
-			<option value="westerdam-05-verandah.gif"                >05 - Verandah</option>
-			<option value="westerdam-04-upper-promenade.gif"         >04 - Upper Promenade</option>
-			<option value="westerdam-03-promenade.gif"               >03 - Promenade</option>
-			<option value="westerdam-02-lower-promenade.gif"         >02 - Lower Promenade</option>
-			<option value="westerdam-01-main.gif"                    >01 - Main Deck</option>
-		</select>
+		<fieldset class="ui-grid-b">
+		<div class="ui-block-a" style="margin-top:.5em"><a href="javascript:previousDeckImage();" data-role="button" data-icon="arrow-d" data-iconpos="notext" style="margin-right:auto">Down</a></div>
+		<div class="ui-block-b">
+			<select name="select-floor" id="select-westerdam" onChange="javascript:updateMapImage();">
+				<option value="westerdam-11-sports.gif"                  >11 - Sports</option>
+				<option value="westerdam-10-observation.gif"             >10 - Observation</option>
+				<option value="westerdam-09-lido.gif" selected="selected">09 - Lido</option>
+				<option value="westerdam-08-navigation.gif"              >08 - Navigation</option>
+				<option value="westerdam-07-rotterdam.gif"               >07 - Rotterdam</option>
+				<option value="westerdam-06-upper-verandah.gif"          >06 - Upper Verandah</option>
+				<option value="westerdam-05-verandah.gif"                >05 - Verandah</option>
+				<option value="westerdam-04-upper-promenade.gif"         >04 - Upper Promenade</option>
+				<option value="westerdam-03-promenade.gif"               >03 - Promenade</option>
+				<option value="westerdam-02-lower-promenade.gif"         >02 - Lower Promenade</option>
+				<option value="westerdam-01-main.gif"                    >01 - Main Deck</option>
+			</select>
+		</div>
+		<div class="ui-block-c" style="margin-top:.5em"><a href="javascript:nextDeckImage();" data-role="button" data-icon="arrow-u" data-iconpos="notext" style="margin-left:auto">Up</a></div>
+		</fieldset>
+
 		<img src="images/westerdam-09-lido.gif" id="select-westerdam-image" style="width:100%" />
 	</div>
 </div>
