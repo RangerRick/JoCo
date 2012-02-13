@@ -95,7 +95,7 @@
 		// console.log('year = ' + dateParts[0] + ', month = ' + dateParts[1] + ', day = ' + dateParts[2]);
 		// console.log('hours = ' + timeParts[0] + ', minutes = ' + timeParts[1]);
 		
-		return new Date(dateParts[0], dateParts[1], dateParts[2], timeParts[0], timeParts[1], 0, 0);
+		return new Date(dateParts[0], dateParts[1] - 1, dateParts[2], timeParts[0], timeParts[1], 0, 0);
 	}
 
 	function updateType(type) {
