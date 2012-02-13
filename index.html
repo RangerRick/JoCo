@@ -6,9 +6,10 @@
 	<link rel="stylesheet" href="jquery.mobile/jquery.mobile-1.0.1.css" />
 	<link rel="apple-touch-icon" href="apple-touch-icon.png" />
 	<style type="text/css">
-		.timespan {
+		.headertime {
 			font-family: monospace;
-			margin-right: 15px;
+		}
+		.headersmall {
 			font-size: smaller;
 		}
 	</style>
@@ -122,6 +123,10 @@
 		$.each(get(type), function(i, entry) {
 			var header = entry.title['$t'];
 			var content = entry.content['$t'];
+			var location = undefined;
+			if (entry['gd$where'] && entry['gd$where'].length > 0) {
+				var location = entry['gd$where'][0].valueString;
+			}
 
 			if (entry['gd$when']) {
 				var start = getDateFromString(entry['gd$when'][0].startTime.replace('.000-', '-'));
@@ -133,13 +138,16 @@
 					last_date = startDate;
 				}
 				
-				header += '<br /><span class="timespan">' + formatTime(start) + '-' + formatTime(end) + '</span>';
+				header += '<br /><span class="headersmall">Time: <span class="headertime">' + formatTime(start) + '-' + formatTime(end) + '</span></span>';
+			}
+			if (location != undefined) {
+				header += '<br /><span class="headersmall">Location: ' + location + '</span>';
 			}
 
 			html += '<li>' + "\n" +
 				'<div>' + "\n"
 				+ '<h3 style="white-space:normal">' + header + '</h3>' + "\n"
-				+ '<p style="white-space:normal">' + content + '</p>' + "\n"
+				+ '<p style="white-space:normal; font-size: larger">' + content + '</p>' + "\n"
 				+ '</div>' + "\n"
 				+ '</li>' + "\n";
 		});
@@ -171,7 +179,7 @@
 				$.getJSON(update.url,
 					function(json) {
 						// console.log(window.JSON.stringify(json));
-						save(update.name, json.feed.entry);
+						// save(update.name, json.feed.entry);
 						handlePendingUpdates();
 					}
 				);
@@ -474,11 +482,11 @@
 	<div data-role="header">
 		<a href="#menu" data-rel="back" data-icon="arrow-l">Back</a>
 		<h1 style="text-align:left; margin-left:10px; white-space:normal"></h1>
-		<form id="chooser" data-role="controlgroup" data-type="horizontal" style="display:inline; margin-top:-5px; padding-top:0" class="ui-btn-right">
+		<form id="chooser" data-role="controlgroup" data-type="horizontal" style="display:inline" data-theme="a" class="ui-btn-right ui-btn ui-btn-corner-all ui-shadow uit-btn-up-a">
 			<input type="radio" name="type-choice" id="type-choice-official"   value="official" checked="checked" onclick="javascript:updateType('official');" />
-			<label for="type-choice-official">Official</label>
+			<label for="type-choice-official" style="font-size:13px">Official</label>
 			<input type="radio" name="type-choice" id="type-choice-unofficial" value="unofficial" onclick="javascript:updateType('unofficial');" />
-			<label for="type-choice-unofficial">Unofficial</label>
+			<label for="type-choice-unofficial" style="font-size:13px">Unofficial</label>
 		</form>
 	</div>
 
