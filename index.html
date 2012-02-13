@@ -111,6 +111,11 @@
 	}
 
 	function refresh() {
+		if ($.mobile.activePage.attr('id') != 'schedule') {
+			console.log("skipping refresh, we're not on the schedule page");
+			return;
+		}
+
 		var html = '';
 		var last_date = '';
 		var type = getType();
@@ -265,11 +270,7 @@
 		// $.mobile.showPageLoadingMsg();
 		if (show) {
 			updateDataIfOnline();
-			// update every 60 minutes
-			timerInterval = setInterval(updateDataIfOnline, 60 * 60 * 1000);
 		} else {
-			clearInterval(timerInterval);
-			timerInterval = undefined;
 		}
 		return true;
 	}
@@ -309,11 +310,11 @@
 	});
 
 	$(document).ready(function() {
-		setType('official');
-	});
-
-	$(document).bind('pageinit', function(event) {
 		$.mobile.defaultPageTransition = 'none';
+		setType('official');
+		updateDataIfOnline();
+		// update every 60 minutes
+		timerInterval = setInterval(updateDataIfOnline, 60 * 60 * 1000);
 	});
 
 	</script>
