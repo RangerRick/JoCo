@@ -49,6 +49,7 @@
     }, false);
   }
 
+	var timerInterval = undefined;
 	var jocoOnline = false;
 
 	var data = [];
@@ -114,8 +115,6 @@
 		var last_date = '';
 		var type = getType();
 		
-		// console.log('type = ' + type);
-
 		$.each(get(type), function(i, entry) {
 			var header = entry.title['$t'];
 			var content = entry.content['$t'];
@@ -176,16 +175,16 @@
 				);
 			} else {
 				console.log("handlePendingUpdates: updates needed, but we are offline");
+				handlePendingUpdates();
 			}
 		} else {
 			console.log("handlePendingUpdates: no more updates needed");
-			$.mobile.hidePageLoadingMsg();
 			refresh();
+			// $.mobile.hidePageLoadingMsg();
 		}
 	}
 	
 	function updateData() {
-		$.mobile.showPageLoadingMsg();
 		pendingUpdates.push({name:"official", url:
 			"http://www.google.com/calendar/feeds/"
 			+ "nh76o8dgn9d86b7n3p3uofg1q0%40group.calendar.google.com"
@@ -256,23 +255,31 @@
 		return false;
 	}
 
-	function onMenu() {
+	function onMenu(show) {
 		console.log("onMenu");
 		return true;
 	}
 
-	function onSchedule() {
+	function onSchedule(show) {
 		console.log("onSchedule");
-		updateDataIfOnline();
+		// $.mobile.showPageLoadingMsg();
+		if (show) {
+			updateDataIfOnline();
+			// update every 60 minutes
+			timerInterval = setInterval(updateDataIfOnline, 60 * 60 * 1000);
+		} else {
+			clearInterval(timerInterval);
+			timerInterval = undefined;
+		}
 		return true;
 	}
 
-	function onMap() {
+	function onMap(show) {
 		console.log("onMap");
 		return true;
 	}
 
-	function onDefault() {
+	function onDefault(show) {
 		console.log("onDefault");
 		return true;
 	}
@@ -282,10 +289,22 @@
 		console.log('pageshow, active page = ' + activePage);
 
 		switch(activePage) {
-			case 'menu':     return onMenu();
-			case 'schedule': return onSchedule();
-			case 'map':      return onMap();
-			default:         return onDefault();
+			case 'menu':     return onMenu(true);
+			case 'schedule': return onSchedule(true);
+			case 'map':      return onMap(true);
+			default:         return onDefault(true);
+		}
+	});
+
+	$(document).bind('pagebeforehide', function(event, data) {
+		var activePage = $.mobile.activePage.attr('id');
+		console.log('pagebeforehide, active page = ' + activePage);
+
+		switch(activePage) {
+			case 'menu':     return onMenu(false);
+			case 'schedule': return onSchedule(false);
+			case 'map':      return onMap(false);
+			default:         return onDefault(false);
 		}
 	});
 
@@ -303,7 +322,7 @@
 
 <div data-role="page" id="menu">
 	<div data-role="header">
-		<h1>JoCo Cruise Crazy</h1>
+		<h1 style="white-space:normal">JoCo Cruise Crazy</h1>
 	</div>
 	
 	<div data-role="content">
@@ -318,7 +337,7 @@
 
 	<div data-role="header">
 		<a href="#menu" data-rel="back" data-icon="arrow-l" data-direction="reverse">Back</a>
-		<h1 style="text-align:left; margin-left:10px"></h1>
+		<h1 style="text-align:left; margin-left:10px; white-space:normal"></h1>
 		<form id="chooser" data-role="controlgroup" data-type="horizontal" style="display:inline; margin-top:-5px; padding-top:0" class="ui-btn-right">
 			<input type="radio" name="type-choice" id="type-choice-official"   value="official" checked="checked" onclick="javascript:updateType('official');" />
 			<label for="type-choice-official">Official</label>
@@ -329,6 +348,7 @@
 
 	<div data-role="content">	
 		<ul id="entry-list" data-role="listview" data-filter="true" data-inset="true">
+			<li>loading...</li>
 		</ul>
 	</div>
 
@@ -337,7 +357,7 @@
 <div data-role="page" id="map">
 	<div data-role="header">
 		<a href="#menu" data-rel="back" data-icon="arrow-l" data-direction="reverse">Back</a>
-		<h1>Westerdam Map</h1>
+		<h1 style="white-space:normal">Westerdam Map</h1>
 	</div>
 	
 	<div data-role="content">
