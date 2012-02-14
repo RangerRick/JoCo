@@ -22,6 +22,7 @@
 			width: 15%;
 		}
 	</style>
+	<script type="text/javascript" charset="utf-8" src="phonegap.js"></script>
 	<script src="jquery/jquery-1.7.1.js"></script>
 	<script src="jquery.mobile/jquery.mobile-1.0.1.js"></script>
 	<script src="jquery.Storage/jquery.Storage.js"></script>
@@ -372,6 +373,13 @@
 		}
 	});
 	*/
+
+	$(document).bind('mobileinit',
+		function() {
+			$.support.cors = true;
+			$.mobile.allowCrossDomainPages = true;
+		}
+	);
 
 	$(document).ready(function() {
 		var images = [
