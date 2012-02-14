@@ -25,11 +25,8 @@
 	<script type="text/javascript" charset="utf-8" src="phonegap.js"></script>
 	<script src="jquery/jquery-1.7.1.js"></script>
 	<script src="jquery.mobile/jquery.mobile-1.0.1.js"></script>
-
-	<!-- <script src="jquery.Storage/jquery.Storage.js"></script> -->
+	<script src="jquery.Storage/jquery.Storage.js"></script>
 	<script type="text/javascript">
-
-	var store = window.localStorage;
 
   var cache = window.applicationCache;
 
@@ -69,6 +66,10 @@
 	var data = [];
 	var pendingUpdates = [];
 	
+	function phoneGapAvailable() {
+	  return typeof(PhoneGap) != 'undefined';
+	}
+
 	var days = [ 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' ];
 	var months = [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ];
 
@@ -177,11 +178,14 @@
 
 	function get(name) {
 		try {
-			val = store.getItem(name);
-			if (val) {
-				return window.JSON.parse(store.getItem(name));
+			if (phoneGapAvailable()) {
+				val = window.localStorage.getItem(name);
+				if (val) {
+					return window.JSON.parse(store.getItem(name));
+				}
+			} else {
+				return $.Storage.loadItem(name);
 			}
-			// return $.Storage.loadItem(name);
 		} catch (e) {
 			console.log("failed to get " + name);
 		}
@@ -190,10 +194,17 @@
 	
 	function save(name, obj) {
 		if (obj == undefined) {
-			return store.removeItem(name);
+			if (phoneGapAvalable()) {
+				return window.localStorage.removeItem(name);
+			} else {
+				return $.Storage.deleteItem(name);
+			}
 		}
-		return store.setItem(name, window.JSON.stringify(obj));
-		// return $.Storage.saveItem(name, obj);
+		if (phoneGapAvailable()) {
+			return window.localStorage.setItem(name, window.JSON.stringify(obj));
+		} else {
+			return $.Storage.saveItem(name, obj);
+		}
 	}
 
 	function handlePendingUpdates() {
@@ -427,7 +438,7 @@
 
 <div data-role="page" id="menu">
 	<div data-role="header">
-		<h1 style="white-space:normal">Cruisin'</h1>
+		<h1 style="white-space:normal">Cruise Monkey</h1>
 	</div>
 	
 	<div data-role="content">
