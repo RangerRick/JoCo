@@ -203,8 +203,14 @@
 	var oneMinute = 60 * 1000;
 	var fiveMinutes = 5 * oneMinute;
 	var fifteenMinutes = 15 * oneMinute;
+	var lastCheck = (new Date()).getTime();
 
 	function checkForReminders() {
+		now = (new Date()).getTime();
+
+		console.log("lastCheck  = " + new Date(lastCheck));
+		console.log("now        = " + new Date(now));
+
 		$.each(['official', 'unofficial'], function(i, type) {
 			console.log("checking for reminders.");
 			var entries = get(type);
@@ -214,15 +220,15 @@
 			$.each(entries, function(j, entry) {
 				if (isFavorite(entry.id)) {
 					console.log('('+type+') ' + entry.title + " is a favorite.... checking for alarms");
-					now = (new Date()).getTime();
-					// round down to 5-minute interval
-					adjusted = (now - (now % oneMinute));
 					// alarm 15 minutes before the event
 					alarmTime = entry.start - fifteenMinutes;
 
-					console.log("adjusted time = " + new Date(adjusted));
 					console.log("alarm time = " + new Date(alarmTime));
-					if (adjusted >= alarmTime && adjusted < (alarmTime + oneMinute)) {
+					console.log("event time = " + new Date(entry.start));
+
+					if (alarmTime > lastCheck && alarmTime <= now) {
+						console.log("BEEP!");
+
 						var title = formatTime(entry.start) + ': ' + entry.title;
 						var header = title;
 						var contents = entry.contents;
@@ -236,12 +242,13 @@
 							$('#alert-text').html(contents);
 							$.mobile.changePage("#alert");
 							$('#alert-title').html(title);
-							console.log("BEEP!");
 						}
 					}
 				}
 			});
 		});
+		
+		lastCheck = now;
 	}
 
 	var scheduleIds = [];
@@ -366,7 +373,7 @@
 		}
 //		if (phoneGapAvailable()) {
 			var stringify = window.JSON.stringify(obj);
-			console.log("saving " + name);
+//			console.log("saving " + name);
 			return window.localStorage.setItem(name, stringify);
 //		} else {
 //			return $.Storage.saveItem(name, obj);
@@ -638,7 +645,6 @@
 
 	var lastUpdated = 0;
 	var doUpdates = function() {
-		console.log("doUpdates");
 		var now = (new Date()).getTime();
 		// every hour
 		if (lastUpdated + (60 * 60 * 1000) < now) {
@@ -671,7 +677,9 @@
 
 		$.mobile.defaultPageTransition = 'none';
 		setType('official');
-		$.mobile.changePage("#menu");
+		if (getCurrentPage() == 'alert') {
+			$.mobile.changePage("#menu");
+		}
 		doUpdates();
 	});
 	</script>
