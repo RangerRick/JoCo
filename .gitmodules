@@ -4,3 +4,6 @@
 [submodule "datejs"]
 	path = datejs
 	url = git://github.com/RangerRick/Datejs.git
+[submodule "json"]
+	path = json
+	url = git://github.com/douglascrockford/JSON-js.git
