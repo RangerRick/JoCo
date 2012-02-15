@@ -28,6 +28,10 @@
 	<script src="jquery/jquery-1.7.1.js"></script>
 	<script src="jquery.mobile/jquery.mobile-1.0.1.js"></script>
 	<script src="jquery.Storage/jquery.Storage.js"></script>
+	<script src="datejs/src/core.js"></script>
+	<script src="datejs/src/globalization/en-US.js"></script>
+	<script src="datejs/src/parser.js"></script>
+	<script src="datejs/src/sugarpak.js"></script>
 	<script type="text/javascript">
 
   var cache = window.applicationCache;
@@ -213,13 +217,13 @@
 	var oneMinute = 60 * 1000;
 	var fiveMinutes = 5 * oneMinute;
 	var fifteenMinutes = 15 * oneMinute;
-	var lastCheck = (new Date());
+	var lastCheck = new Date();
 
 	function checkForReminders() {
-		now = (new Date());
+		now = new Date();
 
-		console.log("lastCheck  = " + new Date(lastCheck));
-		console.log("now        = " + new Date(now));
+		console.log("lastCheck  = " + lastCheck);
+		console.log("now        = " + now);
 
 		$.each(['official', 'unofficial'], function(i, type) {
 			console.log("checking for reminders.");
@@ -231,12 +235,12 @@
 				if (isFavorite(entry.id)) {
 					console.log('('+type+') ' + entry.title + " is a favorite.... checking for alarms");
 					// alarm 15 minutes before the event
-					alarmTime = entry.start - fifteenMinutes;
+					alarmTime = entry.start.getTime() - fifteenMinutes;
 
 					console.log("alarm time = " + new Date(alarmTime));
-					console.log("event time = " + new Date(entry.start));
+					console.log("event time = " + entry.start);
 
-					if (alarmTime > lastCheck && alarmTime <= now) {
+					if (alarmTime.between(lastCheck, now)) {
 						console.log("BEEP!");
 
 						var title = formatTime(entry.start) + ': ' + entry.title;
@@ -362,7 +366,7 @@
 				if (val) {
 					return window.JSON.parse(window.localStorage.getItem(name), function(key, value) {
 						if (key == 'start' || key == 'end') {
-							return new Date(value);
+							value = getDateFromString(value.replace('.000', ''));
 						}
 						return value;
 					});
@@ -422,8 +426,8 @@
 							calendarEvent.title = "Test Event";
 							calendarEvent.content = "This is a test event.";
 							calendarEvent.location = "Someplace";
-							calendarEvent.start = new Date((new Date()) + (17 * 60 * 1000));
-							calendarEvent.end = new Date(calendarEvent.start + (60 * 60 * 1000));
+							calendarEvent.start = new Date((new Date()).getTime() + (17 * 60 * 1000));
+							calendarEvent.end = new Date(calendarEvent.start.getTime() + (60 * 60 * 1000));
 							calendarEvents.push(calendarEvent);
 						}
 
@@ -439,8 +443,8 @@
 								}
 
 								if (entry['gd$when']) {
-									calendarEvent.start = getDateFromString(entry['gd$when'][0].startTime);
-									calendarEvent.end   = getDateFromString(entry['gd$when'][0].endTime);
+									calendarEvent.start = getDateFromString(entry['gd$when'][0].startTime.replace('.000', ''));
+									calendarEvent.end   = getDateFromString(entry['gd$when'][0].endTime.replace('.000', ''));
 								}
 
 								calendarEvents.push(calendarEvent);
@@ -659,11 +663,11 @@
 		}
 	);
 
-	var lastUpdated = 0;
+	var lastUpdated = new Date(0);
 	var doUpdates = function() {
-		var now = (new Date());
+		var now = new Date();
 		// every hour
-		if (lastUpdated + (60 * 60 * 1000) < now) {
+		if (lastUpdated.add(1).hour().compareTo(now) < 1) {
 			console.log("updateDataIfOnline is out of date, running");
 			updateDataIfOnline();
 			lastUpdated = now;
