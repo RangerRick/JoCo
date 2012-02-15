@@ -206,12 +206,9 @@
 
 	function checkForReminders() {
 		$.each(['official', 'unofficial'], function(i, type) {
-			var type = get(type);
-			if (type == undefined) {
-				return;
-			}
+			console.log("checking for reminders.");
 			var entries = get(type);
-			if (entries == undefined) {
+			if (type == undefined) {
 				return;
 			}
 			$.each(entries, function(j, entry) {
@@ -641,6 +638,7 @@
 
 	var lastUpdated = 0;
 	var doUpdates = function() {
+		console.log("doUpdates");
 		var now = (new Date()).getTime();
 		// every hour
 		if (lastUpdated + (60 * 60 * 1000) < now) {
@@ -674,13 +672,6 @@
 		$.mobile.defaultPageTransition = 'none';
 		setType('official');
 		doUpdates();
-		/*
-		updateDataIfOnline();
-		// update every 60 minutes
-		refreshInterval = setInterval(updateDataIfOnline, 60 * 60 * 1000);
-		// check every minute
-		reminderInterval = setInterval(checkForReminders, 60 * 1000);
-		*/
 	});
 	</script>
 </head> 
