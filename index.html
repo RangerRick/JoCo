@@ -73,9 +73,15 @@
 	var data = [];
 	var pendingUpdates = [];
 	
+	function debugLog(text) {
+		if (debug) {
+			console.log(formatTime(new Date(), true) + ': ' + text);
+		}
+	}
+
 	function phoneGapAvailable() {
 	  var ret = (typeof(PhoneGap) != 'undefined');
-		// console.log("phoneGapAvailable = " + ret + ", typeof = " + typeof(PhoneGap));
+		debugLog("phoneGapAvailable = " + ret + ", typeof = " + typeof(PhoneGap));
 		return ret;
 	}
 
@@ -83,12 +89,17 @@
 	var months = [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ];
 
 	// dateFormat.masks.joco = 'ddd, mmm d hh:MMTT';
-	function formatTime(d) {
+	function formatTime(d, doSeconds = false) {
 		var hour = String('0' + (d.getHours() % 12)).slice(-2);
 		if (hour == '00') {
 			hour = '12';
 		}
 		var ret = hour + ':' + String('0' + d.getMinutes()).slice(-2);
+		
+		if (doSeconds) {
+			ret += ':' + String('0' + d.getSeconds()).slice(-2);
+		}
+
 		if ((d.getHours() % 12) == d.getHours()) {
 			ret += 'AM';
 		} else {
@@ -203,10 +214,10 @@
 	var oneMinute = 60 * 1000;
 	var fiveMinutes = 5 * oneMinute;
 	var fifteenMinutes = 15 * oneMinute;
-	var lastCheck = (new Date()).getTime();
+	var lastCheck = (new Date());
 
 	function checkForReminders() {
-		now = (new Date()).getTime();
+		now = (new Date());
 
 		console.log("lastCheck  = " + new Date(lastCheck));
 		console.log("now        = " + new Date(now));
@@ -408,8 +419,8 @@
 							calendarEvent.title = "Test Event";
 							calendarEvent.content = "This is a test event.";
 							calendarEvent.location = "Someplace";
-							calendarEvent.start = new Date((new Date()).getTime() + (17 * 60 * 1000));
-							calendarEvent.end = new Date(calendarEvent.start.getTime() + (60 * 60 * 1000));
+							calendarEvent.start = new Date((new Date()) + (17 * 60 * 1000));
+							calendarEvent.end = new Date(calendarEvent.start + (60 * 60 * 1000));
 							calendarEvents.push(calendarEvent);
 						}
 
@@ -645,7 +656,7 @@
 
 	var lastUpdated = 0;
 	var doUpdates = function() {
-		var now = (new Date()).getTime();
+		var now = (new Date());
 		// every hour
 		if (lastUpdated + (60 * 60 * 1000) < now) {
 			console.log("updateDataIfOnline is out of date, running");
