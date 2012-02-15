@@ -1,3 +1,6 @@
 [submodule "jquery.Storage"]
 	path = jquery.Storage
 	url = https://github.com/tarellel/jquery.Storage
+[submodule "datejs"]
+	path = datejs
+	url = git://github.com/RangerRick/Datejs.git

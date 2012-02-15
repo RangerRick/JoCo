@@ -62,8 +62,10 @@
     }, false);
   }
 
+	var debug = false;
 	var favorites = new Favorites();
-	var timerInterval = undefined;
+	var refreshInterval = undefined;
+	var reminderInterval = undefined;
 	var jocoOnline = false;
 
 	var data = [];
@@ -134,7 +136,6 @@
 		}
 
 		this.save = function() {
-			console.log("saving contents: " + this.contents);
 			save('favorites', this.contents);
 			return true;
 		}
@@ -165,9 +166,6 @@
 
 	function isFavorite(id) {
 		var fav = favorites.contains(id);
-		if (fav) {
-			console.log("isFavorite(" + id + ")");
-		}
 		return fav;
 	}
 
@@ -188,7 +186,6 @@
 			return;
 		}
 
-		var favorites = favorites;
 		if (favorites.contains(scheduleId)) {
 			unfavorite(scheduleId);
 			$('#favorite-' + entryId).attr('data-theme', 'c');
@@ -198,7 +195,46 @@
 		}
 		refresh();
 	}
-	
+
+	var oneMinute = 60 * 1000;
+	var fiveMinutes = 5 * oneMinute;
+	var fifteenMinutes = 15 * oneMinute;
+
+	function checkForReminders() {
+		$.each(['official', 'unofficial'], function(i, type) {
+			$.each(get(type), function(j, entry) {
+				if (isFavorite(entry.id)) {
+					console.log('('+type+') ' + entry.title + " is a favorite.... checking for alarms");
+					now = (new Date()).getTime();
+					// round down to 5-minute interval
+					adjusted = (now - (now % oneMinute));
+					// alarm 15 minutes before the event
+					alarmTime = entry.start - fifteenMinutes;
+
+					console.log("adjusted time = " + new Date(adjusted));
+					console.log("alarm time = " + new Date(alarmTime));
+					if (adjusted >= alarmTime && adjusted < (alarmTime + oneMinute)) {
+						var title = formatTime(entry.start) + ': ' + entry.title;
+						var header = title;
+						var contents = entry.contents;
+
+						if (phoneGapAvailable()) {
+							navigator.notification.alert(title, function() {}, contents, 'OK');
+							navigator.notification.vibrate(500);
+						} else {
+							$('#alert-title').html(title);
+							$('#alert-header').html(header);
+							$('#alert-text').html(contents);
+							$.mobile.changePage("#alert");
+							$('#alert-title').html(title);
+							console.log("BEEP!");
+						}
+					}
+				}
+			});
+		});
+	}
+
 	var scheduleIds = [];
 
 	function refresh() {
@@ -219,37 +255,33 @@
 		var scheduleEntry = 0;
 
 		$.each(get(type), function(i, entry) {
-			var header = entry.title['$t'];
-			var content = entry.content['$t'];
-			var location = undefined;
-			if (entry['gd$where'] && entry['gd$where'].length > 0) {
-				var location = entry['gd$where'][0].valueString;
+			if (entry.title != undefined && entry.title['$t'] != undefined) {
+				// old storage format found; return
+				return;
 			}
 
-			if (entry['gd$when']) {
-				var start = getDateFromString(entry['gd$when'][0].startTime.replace('.000-', '-'));
-				var end   = getDateFromString(entry['gd$when'][0].endTime.replace('.000-', '-'));
-				
-				var startDate = formatDate(start);
+			var header = entry.title;
+
+			if (entry.start != undefined) {
+				var startDate = formatDate(entry.start);
 				if (last_date != startDate) {
 					html += '<li data-role="list-divider">' + startDate + '</li>' + "\n";
 					last_date = startDate;
 				}
-				
-				header += '<br /><span class="headersmall">Time: <span class="headertime">' + formatTime(start) + '-' + formatTime(end) + '</span></span>';
+				header += '<br /><span class="headersmall">Time: <span class="headertime">' + formatTime(entry.start) + '-' + formatTime(entry.end) + '</span></span>';
 			}
-			if (location != undefined) {
-				header += '<br /><span class="headersmall">Location: ' + location + '</span>';
+				
+			if (entry.location != undefined) {
+				header += '<br /><span class="headersmall">Location: ' + entry.location + '</span>';
 			}
 
-			var id = entry.id['$t'];
-			scheduleIds[scheduleEntry] = id;
-			var buttonThemeColor = (isFavorite(id)? 'e':'c');
+			scheduleIds[scheduleEntry] = entry.id;
+			var buttonThemeColor = (isFavorite(entry.id)? 'e':'c');
 
 			html += '<li><a href="#">' + "\n" +
 				'<div>' + "\n"
 				+ '<h3 style="white-space:normal">' + header + '</h3>' + "\n"
-				+ '<p style="white-space:normal; font-size: larger">' + content + '</p>' + "\n"
+				+ '<p style="white-space:normal; font-size: larger">' + entry.content + '</p>' + "\n"
 				+ '</div>' + "\n"
 				+ '</a><a data-split-icon="star" data-theme="' + buttonThemeColor + '" onClick="javascript:toggleFavorite(' + scheduleEntry + ');" id="favorite-' + scheduleEntry + '">Favorite</a></li>' + "\n";
 				
@@ -265,32 +297,53 @@
 
 	function get(name) {
 		try {
-			if (phoneGapAvailable()) {
+//			if (phoneGapAvailable()) {
 				val = window.localStorage.getItem(name);
 				if (val) {
-					return window.JSON.parse(store.getItem(name));
+					return window.JSON.parse(window.localStorage.getItem(name), function(key, value) {
+						if (key == 'start' || key == 'end') {
+							return new Date(value);
+						}
+						return value;
+					});
 				}
-			} else {
-				return $.Storage.loadItem(name);
-			}
+//			} else {
+//				return $.Storage.loadItem(name);
+//			}
 		} catch (e) {
-			console.log("failed to get " + name);
+			console.log("failed to get " + name + ": " + e);
 		}
 		return undefined;
 	}
 	
 	function save(name, obj) {
 		if (obj == undefined) {
-			if (phoneGapAvalable()) {
+			console.log("removing item " + name);
+//			if (phoneGapAvalable()) {
 				return window.localStorage.removeItem(name);
-			} else {
-				return $.Storage.deleteItem(name);
-			}
+//			} else {
+//				return $.Storage.deleteItem(name);
+//			}
 		}
-		if (phoneGapAvailable()) {
-			return window.localStorage.setItem(name, window.JSON.stringify(obj));
-		} else {
-			return $.Storage.saveItem(name, obj);
+//		if (phoneGapAvailable()) {
+			var stringify = window.JSON.stringify(obj);
+			console.log("saving " + name);
+			return window.localStorage.setItem(name, stringify);
+//		} else {
+//			return $.Storage.saveItem(name, obj);
+//		}
+	}
+
+	function CalendarEvent() {
+		this.id       = undefined;
+		this.title    = undefined;
+		this.start    = undefined;
+		this.end      = undefined;
+		this.location = undefined;
+		this.content  = undefined;
+		
+		this.toString = function() {
+			return this.title + ' (' + this.start + ' to ' + this.end + ')';
 		}
 	}
 
@@ -298,11 +351,43 @@
 		if (pendingUpdates.length > 0) {
 			var update = pendingUpdates.shift();
 			if (jocoOnline) {
-				console.log("handlePendingUpdates: update = " + update.name + ", URL = " + update.url);
+				console.log("handlePendingUpdates: " + update.name);
 				$.getJSON(update.url,
 					function(json) {
+						var calendarEvents = [];
+
+						if (debug) {
+							var calendarEvent = new CalendarEvent();
+							calendarEvent.id=update.name + '-monkey';
+							calendarEvent.title = "Test Event";
+							calendarEvent.content = "This is a test event.";
+							calendarEvent.location = "Someplace";
+							calendarEvent.start = new Date((new Date()).getTime() + (17 * 60 * 1000));
+							calendarEvent.end = new Date(calendarEvent.start.getTime() + (60 * 60 * 1000));
+							calendarEvents.push(calendarEvent);
+						}
+
+						$.each(json.feed.entry, function(i, entry) {
+							calendarEvent = new CalendarEvent();
+
+							calendarEvent.id = entry.id['$t'];
+							calendarEvent.title = entry.title['$t'];
+							calendarEvent.content = entry.content['$t'];
+							if (entry['gd$where'] && entry['gd$where'].length > 0) {
+								calendarEvent.location = entry['gd$where'][0].valueString;
+							}
+
+							if (entry['gd$when']) {
+								calendarEvent.start = getDateFromString(entry['gd$when'][0].startTime);
+								calendarEvent.end   = getDateFromString(entry['gd$when'][0].endTime);
+							}
+
+							calendarEvents.push(calendarEvent);
+						});
+
+						// console.log("events = " + calendarEvents);
 						// console.log(window.JSON.stringify(json));
-						save(update.name, json.feed.entry);
+						save(update.name, calendarEvents);
 						handlePendingUpdates();
 					}
 				);
@@ -423,7 +508,6 @@
 		var current = $('#select-westerdam option:selected');
 		var nextObject = current.prev('option');
 		if (nextObject != undefined && nextObject.val() != undefined) {
-			// $('#swiped').html("nextDeckImage, current = " + current.val() + ", next = " + nextObject.val());
 			current.removeAttr('selected');
 			nextObject.attr('selected', 'selected');
 			$('#select-westerdam').change();
@@ -435,7 +519,6 @@
 		var current = $('#select-westerdam option:selected');
 		var previousObject = current.next('option');
 		if (previousObject != undefined && previousObject.val() != undefined) {
-			// $('#swiped').html("previousDeckImage, current = " + current.val() + ", previous = " + previousObject.val());
 			current.removeAttr('selected');
 			previousObject.attr('selected', 'selected');
 			$('#select-westerdam').change();
@@ -519,6 +602,20 @@
 		}
 	);
 
+	var lastUpdated = 0;
+	var doUpdates = function() {
+		console.log("doUpdates fired");
+		var now = (new Date()).getTime();
+		// every hour
+		if (lastUpdated + (60 * 60 * 1000) < now) {
+			console.log("updateDataIfOnline is out of date, running");
+			updateDataIfOnline();
+			lastUpdated = now;
+		}
+		checkForReminders();
+		setTimeout(doUpdates, (60 * 1000));
+	}
+
 	$(document).ready(function() {
 		var images = [
 			"westerdam-11-sports.gif",
@@ -540,9 +637,14 @@
 
 		$.mobile.defaultPageTransition = 'none';
 		setType('official');
+		doUpdates();
+		/*
 		updateDataIfOnline();
 		// update every 60 minutes
-		timerInterval = setInterval(updateDataIfOnline, 60 * 60 * 1000);
+		refreshInterval = setInterval(updateDataIfOnline, 60 * 60 * 1000);
+		// check every minute
+		reminderInterval = setInterval(checkForReminders, 60 * 1000);
+		*/
 	});
 	</script>
 </head> 
@@ -692,5 +794,15 @@
 	</div>
 </div>
 
+<div data-role="page" id="alert">
+	<div data-role="header" data-theme="d">
+		<h1 id="alert-title" style="white-space:normal">Alert!</h1>
+	</div>
+	
+	<div data-role="content">
+		<h1 id="alert-header" style="white-space:normal">Stuff!</h1>
+		<p id="alert-text">This is an alert.</p>
+		<a href="#menu" data-role="button" data-rel="back" id="alert-button">OK</a>
+	</div>
 </body>
 </html>
