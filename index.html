@@ -163,12 +163,8 @@
 		}
 	}
 
-	function getFavorites() {
-		return favorites;
-	}
-	
 	function isFavorite(id) {
-		var fav = getFavorites().contains(id);
+		var fav = favorites.contains(id);
 		if (fav) {
 			console.log("isFavorite(" + id + ")");
 		}
@@ -177,12 +173,12 @@
 
 	function favorite(id) {
 		console.log("favorite(" + id + ")");
-		return getFavorites().add(id);
+		return favorites.add(id);
 	}
 
 	function unfavorite(id) {
 		console.log("unfavorite(" + id + ")");
-		return getFavorites().remove(id);
+		return favorites.remove(id);
 	}
 
 	function toggleFavorite(entryId) {
@@ -192,7 +188,7 @@
 			return;
 		}
 
-		var favorites = getFavorites();
+		var favorites = favorites;
 		if (favorites.contains(scheduleId)) {
 			unfavorite(scheduleId);
 			$('#favorite-' + entryId).attr('data-theme', 'c');
