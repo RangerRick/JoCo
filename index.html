@@ -62,6 +62,7 @@
     }, false);
   }
 
+	var favorites = new Favorites();
 	var timerInterval = undefined;
 	var jocoOnline = false;
 
@@ -126,6 +127,84 @@
 		return 'official';
 	}
 
+	function Favorites() {
+		this.contents = get('favorites');
+		if (typeof this.contents != 'object' || !this.contents.length) {
+			this.contents = [];
+		}
+
+		this.save = function() {
+			console.log("saving contents: " + this.contents);
+			save('favorites', this.contents);
+			return true;
+		}
+		this.add = function(id) {
+			console.log("add: " + id);
+			this.contents.push(id);
+			return true;
+		}
+		this.remove = function(id) {
+			console.log("remove: " + id);
+			for (var i = 0; i < this.contents.length; i++) {
+				if (this.contents[i] == id) {
+					this.contents.splice(i, 1);
+					break;
+				}
+			}
+			return true;
+		}
+		this.contains = function(id) {
+			for (var i = 0; i < this.contents.length; i++) {
+				if (this.contents[i] == id) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	function getFavorites() {
+		return favorites;
+	}
+	
+	function isFavorite(id) {
+		var fav = getFavorites().contains(id);
+		if (fav) {
+			console.log("isFavorite(" + id + ")");
+		}
+		return fav;
+	}
+
+	function favorite(id) {
+		console.log("favorite(" + id + ")");
+		return getFavorites().add(id);
+	}
+
+	function unfavorite(id) {
+		console.log("unfavorite(" + id + ")");
+		return getFavorites().remove(id);
+	}
+
+	function toggleFavorite(entryId) {
+		var scheduleId = scheduleIds[entryId];
+		if (scheduleId == undefined) {
+			console.log("something went horribly wrong!");
+			return;
+		}
+
+		var favorites = getFavorites();
+		if (favorites.contains(scheduleId)) {
+			unfavorite(scheduleId);
+			$('#favorite-' + entryId).attr('data-theme', 'c');
+		} else {
+			favorite(scheduleId);
+			$('#favorite' + entryId).attr('data-theme', 'e');
+		}
+		refresh();
+	}
+	
+	var scheduleIds = [];
+
 	function refresh() {
 		if (getCurrentPage() != 'schedule') {
 			console.log("skipping refresh, we're not on the schedule page");
@@ -139,7 +218,10 @@
 		if (events == undefined) {
 			return;
 		}
-		
+
+		scheduleIds = [];
+		var scheduleEntry = 0;
+
 		$.each(get(type), function(i, entry) {
 			var header = entry.title['$t'];
 			var content = entry.content['$t'];
@@ -164,16 +246,23 @@
 				header += '<br /><span class="headersmall">Location: ' + location + '</span>';
 			}
 
-			html += '<li>' + "\n" +
+			var id = entry.id['$t'];
+			scheduleIds[scheduleEntry] = id;
+			var buttonThemeColor = (isFavorite(id)? 'e':'c');
+
+			html += '<li><a href="#">' + "\n" +
 				'<div>' + "\n"
 				+ '<h3 style="white-space:normal">' + header + '</h3>' + "\n"
 				+ '<p style="white-space:normal; font-size: larger">' + content + '</p>' + "\n"
 				+ '</div>' + "\n"
-				+ '</li>' + "\n";
+				+ '</a><a data-split-icon="star" data-theme="' + buttonThemeColor + '" onClick="javascript:toggleFavorite(' + scheduleEntry + ');" id="favorite-' + scheduleEntry + '">Favorite</a></li>' + "\n";
+				
+				scheduleEntry++;
 		});
 
 		if(getCurrentPage() == 'schedule') {
 			$('#calendar-list').html(html);
+			favorites.save();
 			$('#calendar-list').listview('refresh');
 		}
 	}
@@ -569,7 +658,7 @@
 	</div>
 
 	<div data-role="content">	
-		<ul id="calendar-list" data-role="listview" data-filter="true" data-inset="true">
+		<ul id="calendar-list" data-role="listview" data-filter="true" data-inset="true" data-split-icon="star" data-split-theme="c">
 			<li>loading...</li>
 		</ul>
 	</div>
