@@ -224,7 +224,7 @@
 		$.each(['official', 'unofficial'], function(i, type) {
 			console.log("checking for reminders.");
 			var entries = get(type);
-			if (type == undefined) {
+			if (entries == undefined || entries.length == 0) {
 				return;
 			}
 			$.each(entries, function(j, entry) {
@@ -266,7 +266,11 @@
 	function getAllEvents() {
 		var events = [];
 		$.each(['official', 'unofficial'], function(i, type) {
-			$.each(get(type), function(i, entry) {
+			var typeEvents = get(type);
+			if (typeEvents == undefined || typeEvents.length == 0) {
+				return;
+			}
+			$.each(typeEvents, function(i, entry) {
 				events.push(entry);
 			})
 		});
@@ -423,23 +427,25 @@
 							calendarEvents.push(calendarEvent);
 						}
 
-						$.each(json.feed.entry, function(i, entry) {
-							calendarEvent = new CalendarEvent();
+						if (json != undefined && json.feed != undefined && json.feed.entry != undefined) {
+							$.each(json.feed.entry, function(i, entry) {
+								calendarEvent = new CalendarEvent();
 
-							calendarEvent.id = entry.id['$t'];
-							calendarEvent.title = entry.title['$t'];
-							calendarEvent.content = entry.content['$t'];
-							if (entry['gd$where'] && entry['gd$where'].length > 0) {
-								calendarEvent.location = entry['gd$where'][0].valueString;
-							}
+								calendarEvent.id = entry.id['$t'];
+								calendarEvent.title = entry.title['$t'];
+								calendarEvent.content = entry.content['$t'];
+								if (entry['gd$where'] && entry['gd$where'].length > 0) {
+									calendarEvent.location = entry['gd$where'][0].valueString;
+								}
 
-							if (entry['gd$when']) {
-								calendarEvent.start = getDateFromString(entry['gd$when'][0].startTime);
-								calendarEvent.end   = getDateFromString(entry['gd$when'][0].endTime);
-							}
+								if (entry['gd$when']) {
+									calendarEvent.start = getDateFromString(entry['gd$when'][0].startTime);
+									calendarEvent.end   = getDateFromString(entry['gd$when'][0].endTime);
+								}
 
-							calendarEvents.push(calendarEvent);
-						});
+								calendarEvents.push(calendarEvent);
+							});
+						}
 
 						// console.log(window.JSON.stringify(json));
 						save(update.name, calendarEvents);
