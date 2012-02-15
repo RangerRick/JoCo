@@ -28,7 +28,6 @@
 	<script src="jquery/jquery-1.7.1.js"></script>
 	<script src="jquery.mobile/jquery.mobile-1.0.1.js"></script>
 	<script src="jquery.Storage/jquery.Storage.js"></script>
-	<script src="json/json2.js"></script>
 	<script type="text/javascript">
 
   var cache = window.applicationCache;
@@ -75,8 +74,8 @@
 	var pendingUpdates = [];
 	
 	function phoneGapAvailable() {
-	  var ret = typeof(PhoneGap) != 'undefined';
-		console.log("phoneGapAvailable = " + ret + ", typeof = " + typeof(PhoneGap));
+	  var ret = (typeof(PhoneGap) != 'undefined');
+		// console.log("phoneGapAvailable = " + ret + ", typeof = " + typeof(PhoneGap));
 		return ret;
 	}
 
@@ -211,7 +210,11 @@
 			if (type == undefined) {
 				return;
 			}
-			$.each(get(type), function(j, entry) {
+			var entries = get(type);
+			if (entries == undefined) {
+				return;
+			}
+			$.each(entries, function(j, entry) {
 				if (isFavorite(entry.id)) {
 					console.log('('+type+') ' + entry.title + " is a favorite.... checking for alarms");
 					now = (new Date()).getTime();
@@ -517,12 +520,10 @@
 	}
 
 	function onMenu(show) {
-		console.log("onMenu");
 		return true;
 	}
 
 	function onSchedule(show) {
-		console.log("onSchedule");
 		if (show) {
 			refresh();
 			updateDataIfOnline();
@@ -532,12 +533,10 @@
 	}
 
 	function onMap(show) {
-		console.log("onMap");
 		return true;
 	}
 
 	function onDefault(show) {
-		console.log("onDefault");
 		return true;
 	}
 	
