@@ -88,15 +88,14 @@
 	var days = [ 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' ];
 	var months = [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ];
 
-	// dateFormat.masks.joco = 'ddd, mmm d hh:MMTT';
-	function formatTime(d, doSeconds = false) {
+	function formatTime(d, doSeconds) {
 		var hour = String('0' + (d.getHours() % 12)).slice(-2);
 		if (hour == '00') {
 			hour = '12';
 		}
 		var ret = hour + ':' + String('0' + d.getMinutes()).slice(-2);
 		
-		if (doSeconds) {
+		if (doSeconds != undefined && doSeconds == true) {
 			ret += ':' + String('0' + d.getSeconds()).slice(-2);
 		}
 
