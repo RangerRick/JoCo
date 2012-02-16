@@ -24,6 +24,13 @@
 			width: 15%;
 		}
 	</style>
+	<script src="log4javascript/log4javascript.js"></script>
+	<script type="text/javascript">
+		var log = log4javascript.getLogger();
+		var appender = new log4javascript.BrowserConsoleAppender();
+		appender.setLayout(new log4javascript.PatternLayout('%d{yyyy-MM-dd HH:mm:ss,SSS} [%5p] %m'));
+		log.addAppender(appender);
+	</script>
 	<script type="text/javascript" charset="utf-8" src="phonegap.js"></script>
 	<script src="jquery/jquery-1.7.1.js"></script>
 	<script src="jquery.mobile/jquery.mobile-1.0.1.js"></script>
@@ -32,44 +39,14 @@
 	<script src="datejs/src/globalization/en-US.js"></script>
 	<script src="datejs/src/parser.js"></script>
 	<script src="datejs/src/sugarpak.js"></script>
+	<script src="app/appcache.js"></script>
+	<script src="app/date.js"></script>
+	<script src="app/storage.js"></script>
+	<script src="app/favorites.js"></script>
 	<script type="text/javascript">
-
-  var cache = window.applicationCache;
-
-  if (typeof cache != 'undefined') {
-    cache.addEventListener("cached", function () {
-        console.log("All resources for this web app have now been downloaded. You can run this application while not connected to the internet");
-    }, false);
-    cache.addEventListener("checking", function () {
-        console.log("Checking manifest");
-    }, false);
-    cache.addEventListener("downloading", function () {
-        console.log("Starting download of cached files");
-    }, false);
-    cache.addEventListener("error", function (e) {
-        console.log("There was an error in the manifest, downloading cached files or you're offline: " + e);
-    }, false);
-    cache.addEventListener("noupdate", function () {
-        console.log("There was no update needed");
-    }, false);
-		/*
-    cache.addEventListener("progress", function () {
-        console.log("Downloading cached files");
-    }, false);
-		*/
-    cache.addEventListener("updateready", function () {
-        cache.swapCache();
-        console.log("Updated cache is ready");
-        // Even after swapping the cache the currently loaded page won't use it
-        // until it is reloaded, so force a reload so it is current.
-        window.location.reload(true);
-    }, false);
-  }
 
 	var debug = true;
 	var favorites = new Favorites();
-	var refreshInterval = undefined;
-	var reminderInterval = undefined;
 	var jocoOnline = false;
 	var normalTheme = 'c';
 	var hilightTheme = 'e';
@@ -77,53 +54,10 @@
 	var data = [];
 	var pendingUpdates = [];
 	
-	function debugLog(text) {
-		if (debug) {
-			console.log(formatTime(new Date(), true) + ': ' + text);
-		}
-	}
-
 	function phoneGapAvailable() {
 	  var ret = (typeof(PhoneGap) != 'undefined');
-		debugLog("phoneGapAvailable = " + ret + ", typeof = " + typeof(PhoneGap));
+		log.trace("phoneGapAvailable = " + ret + ", typeof = " + typeof(PhoneGap));
 		return ret;
-	}
-
-	var days = [ 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' ];
-	var months = [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ];
-
-	function formatTime(d, doSeconds) {
-		var hour = String('0' + (d.getHours() % 12)).slice(-2);
-		if (hour == '00') {
-			hour = '12';
-		}
-		var ret = hour + ':' + String('0' + d.getMinutes()).slice(-2);
-		
-		if (doSeconds != undefined && doSeconds == true) {
-			ret += ':' + String('0' + d.getSeconds()).slice(-2);
-		}
-
-		if ((d.getHours() % 12) == d.getHours()) {
-			ret += 'AM';
-		} else {
-			ret += 'PM';
-		}
-		return ret;
-	}
-
-	function formatDate(d) {
-		return days[d.getDay()] + ', ' + months[d.getMonth()] + ' ' + d.getDate();
-	}
-
-	function getDateFromString(dateTimeString) {
-		var dateTimeParts = dateTimeString.split('T');
-		var dateParts = dateTimeParts[0].split('-');
-		var timeParts = dateTimeParts[1].split(':');
-		
-		// console.log('year = ' + dateParts[0] + ', month = ' + dateParts[1] + ', day = ' + dateParts[2]);
-		// console.log('hours = ' + timeParts[0] + ', minutes = ' + timeParts[1]);
-		
-		return new Date(dateParts[0], dateParts[1] - 1, dateParts[2], timeParts[0], timeParts[1], 0, 0);
 	}
 
 	function updateType(type) {
@@ -147,68 +81,18 @@
 		return 'official';
 	}
 
-	function Favorites() {
-		this.contents = get('favorites');
-		if (this.contents == undefined || ((typeof this.contents) != 'object') || (!this.contents.length)) {
-			this.contents = [];
-		}
-
-		this.save = function() {
-			save('favorites', this.contents);
-			return true;
-		}
-		this.add = function(id) {
-			console.log("add: " + id);
-			this.contents.push(id);
-			return true;
-		}
-		this.remove = function(id) {
-			console.log("remove: " + id);
-			for (var i = 0; i < this.contents.length; i++) {
-				if (this.contents[i] == id) {
-					this.contents.splice(i, 1);
-					break;
-				}
-			}
-			return true;
-		}
-		this.contains = function(id) {
-			for (var i = 0; i < this.contents.length; i++) {
-				if (this.contents[i] == id) {
-					return true;
-				}
-			}
-			return false;
-		}
-	}
-
-	function isFavorite(id) {
-		var fav = favorites.contains(id);
-		return fav;
-	}
-
-	function favorite(id) {
-		console.log("favorite(" + id + ")");
-		return favorites.add(id);
-	}
-
-	function unfavorite(id) {
-		console.log("unfavorite(" + id + ")");
-		return favorites.remove(id);
-	}
-
 	function toggleFavorite(entryId) {
 		var scheduleId = scheduleIds[entryId];
 		if (scheduleId == undefined) {
-			console.log("something went horribly wrong!");
+			log.warn("Couldn't toggle " + scheduleId + "!");
 			return;
 		}
 
 		if (favorites.contains(scheduleId)) {
-			unfavorite(scheduleId);
+			favorites.remove(scheduleId);
 			$('#favorite-' + entryId).attr('data-theme', normalTheme);
 		} else {
-			favorite(scheduleId);
+			favorites.add(scheduleId);
 			$('#favorite' + entryId).attr('data-theme', hilightTheme);
 		}
 		refresh();
@@ -220,28 +104,32 @@
 	var lastCheck = new Date();
 
 	function checkForReminders() {
+		if (!phoneGapAvailable()) {
+			log.trace("not in an app, skip reminder support");
+			return;
+		}
 		now = new Date();
 
-		console.log("lastCheck  = " + lastCheck);
-		console.log("now        = " + now);
+		log.trace("lastCheck  = " + lastCheck);
+		log.trace("now        = " + now);
 
 		$.each(['official', 'unofficial'], function(i, type) {
-			console.log("checking for reminders.");
+			log.debug("checking for reminders.");
 			var entries = get(type);
 			if (entries == undefined || entries.length == 0) {
 				return;
 			}
 			$.each(entries, function(j, entry) {
-				if (isFavorite(entry.id)) {
-					console.log('('+type+') ' + entry.title + " is a favorite.... checking for alarms");
+				if (favorites.contains(entry.id)) {
+					log.debug('('+type+') ' + entry.title + " is a favorite.... checking for alarms");
 					// alarm 15 minutes before the event
-					alarmTime = entry.start.getTime() - fifteenMinutes;
+					alarmDate = entry.start.add(-15).minutes();
 
-					console.log("alarm time = " + new Date(alarmTime));
-					console.log("event time = " + entry.start);
+					log.trace("alarm time = " + alarmDate);
+					log.trace("event time = " + entry.start);
 
 					if (alarmTime.between(lastCheck, now)) {
-						console.log("BEEP!");
+						log.info("BEEP!");
 
 						var title = formatTime(entry.start) + ': ' + entry.title;
 						var header = title;
@@ -286,7 +174,7 @@
 	
 	function refresh() {
 		if (getCurrentPage() != 'schedule') {
-			console.log("skipping refresh, we're not on the schedule page");
+			log.debug("skipping refresh, we're not on the schedule page");
 			return;
 		}
 
@@ -297,9 +185,9 @@
 		
 		if (type == 'favorite') {
 			$.each(getAllEvents(), function(i, entry) {
-				// console.log("event = " + entry.title);
-				if (isFavorite(entry.id)) {
-					// console.log("favorite = " + entry.title);
+				// log.trace("event = " + entry.title);
+				if (favorites.contains(entry.id)) {
+					// log.trace("favorite = " + entry.title);
 					events.push(entry);
 				}
 			});
@@ -338,7 +226,7 @@
 			scheduleIds[scheduleEntry] = entry.id;
 			var buttonThemeColor = normalTheme;
 			if (type != 'favorite') {
-				buttonThemeColor = (isFavorite(entry.id)? hilightTheme:normalTheme);
+				buttonThemeColor = (favorites.contains(entry.id)? hilightTheme:normalTheme);
 			}
 
 			html += '<li data-theme="'+buttonThemeColor+'" data-icon="star" id="favorite-'+scheduleEntry+'"><a href="javascript:toggleFavorite('+scheduleEntry+');">' + "\n" +
@@ -347,7 +235,6 @@
 				+ '<p style="white-space:normal; font-size:13px">' + entry.content + '</p>' + "\n"
 				+ '</div>' + "\n"
 				+ '</a>' + "\n";
-				// '<a data-split-icon="star" data-theme="' + buttonThemeColor + '" onClick="javascript:toggleFavorite(' + scheduleEntry + ');" id="favorite-' + scheduleEntry + '">Favorite</a></li>' + "\n";
 				
 				scheduleEntry++;
 		});
@@ -357,45 +244,6 @@
 			favorites.save();
 			$('#calendar-list').listview('refresh');
 		}
-	}
-
-	function get(name) {
-		try {
-//			if (phoneGapAvailable()) {
-				val = window.localStorage.getItem(name);
-				if (val) {
-					return window.JSON.parse(window.localStorage.getItem(name), function(key, value) {
-						if (key == 'start' || key == 'end') {
-							value = getDateFromString(value.replace('.000', ''));
-						}
-						return value;
-					});
-				}
-//			} else {
-//				return $.Storage.loadItem(name);
-//			}
-		} catch (e) {
-			console.log("failed to get " + name + ": " + e);
-		}
-		return undefined;
-	}
-	
-	function save(name, obj) {
-		if (obj == undefined) {
-//			console.log("removing item " + name);
-//			if (phoneGapAvalable()) {
-				return window.localStorage.removeItem(name);
-//			} else {
-//				return $.Storage.deleteItem(name);
-//			}
-		}
-//		if (phoneGapAvailable()) {
-			var stringify = window.JSON.stringify(obj);
-//			console.log("saving " + name);
-			return window.localStorage.setItem(name, stringify);
-//		} else {
-//			return $.Storage.saveItem(name, obj);
-//		}
 	}
 
 	function CalendarEvent() {
@@ -415,7 +263,7 @@
 		if (pendingUpdates.length > 0) {
 			var update = pendingUpdates.shift();
 			if (jocoOnline) {
-				console.log("handlePendingUpdates: " + update.name);
+				log.debug("handlePendingUpdates: " + update.name);
 				$.getJSON(update.url,
 					function(json) {
 						var calendarEvents = [];
@@ -451,17 +299,17 @@
 							});
 						}
 
-						// console.log(window.JSON.stringify(json));
+						// log.trace(window.JSON.stringify(json));
 						save(update.name, calendarEvents);
 						handlePendingUpdates();
 					}
 				);
 			} else {
-				console.log("handlePendingUpdates: updates needed, but we are offline");
+				log.debug("handlePendingUpdates: updates needed, but we are offline");
 				handlePendingUpdates();
 			}
 		} else {
-			console.log("handlePendingUpdates: no more updates needed");
+			log.info("handlePendingUpdates: no more updates needed");
 			refresh();
 		}
 	}
@@ -523,7 +371,7 @@
 						updateData();
 						return;
 					}
-					console.log("Error: request = " + window.JSON.stringify(req) + ", status = " + status + ", ex = " + ex);
+					log.warn("Error: request = " + window.JSON.stringify(req) + ", status = " + status, ex);
 					// We might not be technically "offline" if the error is not a timeout, but
 					// otherwise we're getting some sort of error when we shouldn't, so we're
 					// going to treat it as if we're offline.
@@ -533,7 +381,7 @@
 				}
 			});
 		} else {
-			console.log("not online");
+			log.debug("not online");
 			refresh();
 		}
 	}
@@ -591,18 +439,18 @@
 	}
 
 	function freezeViewport() {
-		console.log("freezeViewport");
+		log.debug("freezeViewport");
 		$('meta[name=viewport]').attr('content', 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no');
 	}
 
 	function unfreezeViewport() {
-		console.log("unfreezeViewport");
+		log.debug("unfreezeViewport");
 		$('meta[name=viewport]').attr('content', 'width=device-width, initial-scale=1.0, user-scalable=yes');
 	}
 	
 	$(document).bind('pageshow', function(event, data) {
 		var activePage = getCurrentPage();
-		// console.log('pageshow, active page = ' + activePage);
+		log.debug('pageshow, active page = ' + activePage);
 
 		switch(activePage) {
 			case 'menu':     return onMenu(true);
@@ -631,7 +479,7 @@
 
 	$(document).bind('pagebeforehide', function(event, data) {
 		var activePage = getCurrentPage();
-		// console.log('pagebeforehide, active page = ' + activePage);
+		log.debug('pagebeforehide, active page = ' + activePage);
 
 		switch(activePage) {
 			case 'menu':     return onMenu(false);
@@ -668,7 +516,7 @@
 		var now = new Date();
 		// every hour
 		if (lastUpdated.add(1).hour().compareTo(now) < 1) {
-			console.log("updateDataIfOnline is out of date, running");
+			log.info("updateDataIfOnline is out of date, running");
 			updateDataIfOnline();
 			lastUpdated = now;
 		}

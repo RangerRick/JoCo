@@ -2,8 +2,15 @@ CACHE MANIFEST
 # @GITHASH@ @DATE@
 
 CACHE:
+# internal app stuff
 index.html
 offline.html
+app/appcache.js
+app/date.js
+app/favorites.js
+app/storage.js
+
+# images
 images/westerdam-01-main.gif
 images/westerdam-02-lower-promenade.gif
 images/westerdam-03-promenade.gif
@@ -15,6 +22,12 @@ images/westerdam-08-navigation.gif
 images/westerdam-09-lido.gif
 images/westerdam-10-observation.gif
 images/westerdam-11-sports.gif
+
+# 3rd-party libraries
+datejs/src/core.js
+datejs/src/globalization/en-US.js
+datejs/src/parser.js
+datejs/src/sugarpak.js
 jquery/jquery-1.7.1.js
 jquery/jquery-1.7.1.min.js
 jquery.mobile/images/ajax-loader.png
@@ -29,6 +42,7 @@ jquery.mobile/jquery.mobile-1.0.1.min.js
 jquery.mobile/jquery.mobile.structure-1.0.1.css
 jquery.mobile/jquery.mobile.structure-1.0.1.min.css
 jquery.Storage/jquery.Storage.js
+log4javascript/log4javascript.js
 
 FALLBACK:
 online.html offline.html
