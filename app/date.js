@@ -26,7 +26,7 @@ function formatDate(d) {
 
 function getDateFromString(dateTime) {
 	if (dateTime instanceof Date) {
-		return new Date(dateTime.getUTCFullYear(), dateTime.getUTCMonth(), dateTime.getUTCDate(), dateTime.getUTCHours(), dateTime.getUTCMinutes(), 0, 0);
+		return new Date(dateTime.getFullYear(), dateTime.getMonth(), dateTime.getDate(), dateTime.getHours(), dateTime.getMinutes(), 0, 0);
 	}
 	var dateTimeParts = dateTime.split('T');
 	var dateParts = dateTimeParts[0].split('-');
