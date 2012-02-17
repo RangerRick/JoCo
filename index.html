@@ -128,7 +128,7 @@
 					if (alarmDate.between(lastCheck, now)) {
 						log.info("BEEP!");
 
-						var title = entry.start + ': ' + entry.title;
+						var title = formatTime(entry.start) + ': ' + entry.title;
 						var header = title;
 						var contents = entry.contents;
 
