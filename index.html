@@ -45,7 +45,7 @@
 	<script type="text/javascript">
 
 	var storageVersion = 4;
-	var debug = true;
+	var includeTestEvent = false;
 	var favorites = new Favorites();
 	var jocoOnline = false;
 	var normalTheme = 'c';
@@ -267,7 +267,7 @@
 					function(json) {
 						var calendarEvents = [];
 
-						if (debug) {
+						if (includeTestEvent) {
 							var now = new Date();
 							var nowTime = now.getTime();
 							var calendarStart = new Date(nowTime - (nowTime % 1000) + (60 * 1000 * 17));
