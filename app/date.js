@@ -38,12 +38,12 @@ function getDateFromString(dateTime) {
 	return new Date(dateParts[0], dateParts[1] - 1, dateParts[2], timeParts[0], timeParts[1], 0, 0);
 }
 
-function getStringFromDate(dateTime) {
-	return d.getFullYear() + '-'
-		+ String('0' + d.getMonth()).slice(-2)
-		+ '-' + String('0' + d.getDate()).slice(-2)
-		+ 'T' + String('0' + d.getHours()).slice(-2)
-		+ ':' + String('0' + d.getMinutes()).slice(-2)
-		+ ':' + String('0' + d.getSeconds()).slice(-2)
+function getStringFromDate(d) {
+	return d.getUTCFullYear() + '-'
+		+ String('0' + d.getUTCMonth()).slice(-2)
+		+ '-' + String('0' + d.getUTCDate()).slice(-2)
+		+ 'T' + String('0' + d.getUTCHours()).slice(-2)
+		+ ':' + String('0' + d.getUTCMinutes()).slice(-2)
+		+ ':' + String('0' + d.getUTCSeconds()).slice(-2)
 		+ '-00:00';
 }

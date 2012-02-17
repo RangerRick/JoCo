@@ -45,7 +45,7 @@
 	<script src="app/favorites.js"></script>
 	<script type="text/javascript">
 
-	var storageVersion = 2;
+	var storageVersion = 3;
 	var debug = true;
 	var favorites = new Favorites();
 	var jocoOnline = false;
@@ -101,7 +101,7 @@
 
 	function checkForReminders() {
 		if (!phoneGapAvailable()) {
-			log.trace("not in an app, skip reminder support");
+			log.debug("not in an app, skip reminder support");
 			return;
 		}
 		var lastCheck = new Date(get('lastCheck', 0));
@@ -270,13 +270,16 @@
 						if (debug) {
 							var now = new Date();
 							var nowTime = now.getTime();
+							var calendarStart = new Date(nowTime - (nowTime % 1000) + (60 * 1000 * 17));
+							var calendarEnd   = new Date(calendarStart.getTime() + (60 * 1000 * 60));
+
 							var calendarEvent = new CalendarEvent();
 							calendarEvent.id=update.name + '-monkey';
 							calendarEvent.title = "Test Event";
 							calendarEvent.content = "This is a test event.";
 							calendarEvent.location = "Someplace";
-							calendarEvent.start = new Date(nowTime - (nowTime % 1000) + (60 * 1000 * 17));
-							calendarEvent.end = new Date(calendarEvent.start.getTime() + (60 * 1000 * 60));
+							calendarEvent.start = getStringFromDate(calendarStart);
+							calendarEvent.end = getStringFromDate(calendarEnd);
 							calendarEvents.push(calendarEvent);
 						}
 
@@ -292,8 +295,8 @@
 								}
 
 								if (entry['gd$when']) {
-									calendarEvent.start = getDateFromString(entry['gd$when'][0].startTime.replace('.000', ''));
-									calendarEvent.end   = getDateFromString(entry['gd$when'][0].endTime.replace('.000', ''));
+									calendarEvent.start = getStringFromDate(getDateFromString(entry['gd$when'][0].startTime.replace('.000', '')));
+									calendarEvent.end   = getStringFromDate(getDateFromString(entry['gd$when'][0].endTime.replace('.000', '')));
 								}
 
 								calendarEvents.push(calendarEvent);
