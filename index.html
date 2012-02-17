@@ -106,9 +106,6 @@
 		var lastCheck = new Date(get('lastCheck', 0));
 		now = new Date();
 
-		log.debug("lastCheck  = " + lastCheck);
-		log.debug("now        = " + now);
-
 		$.each(['official', 'unofficial'], function(i, type) {
 			log.debug("checking for reminders (" + type + ")");
 			var entries = get(type);
@@ -123,8 +120,10 @@
 					startTime = getDateFromString(entry.start);
 					var alarmDate = new Date(startTime.getTime() - (60 * 1000 * 15));
 
-					log.debug("alarm = " + alarmDate);
-					log.debug("event = " + entry.start);
+					log.debug("lastCheck  = " + lastCheck);
+					log.debug("now        = " + now);
+					log.debug("alarm      = " + alarmDate);
+					log.debug("event      = " + entry.start);
 
 					if (alarmDate.between(lastCheck, now)) {
 						log.info("BEEP!");
@@ -143,6 +142,8 @@
 							$.mobile.changePage("#alert");
 							$('#alert-title').html(title);
 						}
+					} else {
+						log.debug(alarmDate + " is not between " + lastCheck + " and " + now);
 					}
 				}
 			});
