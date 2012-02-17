@@ -11,6 +11,7 @@ app/favorites.js
 app/storage.js
 
 # images
+images/icon-ship-512.png
 images/westerdam-01-main.gif
 images/westerdam-02-lower-promenade.gif
 images/westerdam-03-promenade.gif
