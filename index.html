@@ -109,7 +109,7 @@
 		$.each(['official', 'unofficial'], function(i, type) {
 			log.debug("checking for reminders (" + type + ")");
 			var entries = get(type);
-			if (entries == undefined || entries.length == 0) {
+			if ((!entries) || entries.length === 0) {
 				log.debug("no entries found");
 				return;
 			}
@@ -157,14 +157,15 @@
 	function getAllEvents() {
 		var events = [];
 		$.each(['official', 'unofficial'], function(i, type) {
-			var typeEvents = get(type);
-			if (typeEvents == undefined || typeEvents.length == 0) {
-				return;
+				var typeEvents = get(type);
+				if ((!typeEvents) || typeEvents.length === 0) {
+					return;
+				}
+				$.each(typeEvents, function(i, entry) {
+					events.push(entry);
+				});
 			}
-			$.each(typeEvents, function(i, entry) {
-				events.push(entry);
-			})
-		});
+		);
 		events.sort(function(a, b) {
 			return a.start - b.start;
 		});
@@ -194,7 +195,7 @@
 			events = get(type);
 		}
 
-		if (events == undefined || events.length == 0) {
+		if ((!events) || events.length === 0) {
 			return;
 		}
 
@@ -229,12 +230,12 @@
 			}
 
 			html += '<li data-theme="'+buttonThemeColor+'" data-icon="star" id="favorite-'+scheduleEntry+'"><a href="javascript:toggleFavorite('+scheduleEntry+');">' + "\n" +
-				'<div>' + "\n"
-				+ '<h3 style="white-space:normal">' + header + '</h3>' + "\n"
-				+ '<p style="white-space:normal; font-size:13px">' + entry.content + '</p>' + "\n"
-				+ '</div>' + "\n"
-				+ '</a>' + "\n";
-				
+				'<div>' + "\n" +
+				'<h3 style="white-space:normal">' + header + '</h3>' + "\n" +
+				'<p style="white-space:normal; font-size:13px">' + entry.content + '</p>' + "\n" +
+				'</div>' + "\n" +
+				'</a>' + "\n";
+
 				scheduleEntry++;
 		});
 
@@ -255,7 +256,7 @@
 		
 		this.toString = function() {
 			return this.title + ' (' + this.start + ' to ' + this.end + ')';
-		}
+		};
 	}
 
 	function handlePendingUpdates() {
@@ -320,28 +321,28 @@
 	
 	function updateData() {
 		pendingUpdates.push({name:"official", url:
-			"http://www.google.com/calendar/feeds/"
-			+ "nh76o8dgn9d86b7n3p3uofg1q0%40group.calendar.google.com"
-			+ "/public/full?alt=json-in-script"
-//			+ "&ctz=Etc/UTC"
-			+ "&ctz=America/New_York"
-			+ "&orderby=starttime"
-			+ "&sortorder=ascending"
-			+ "&max-results=10000"
-			+ "&start-min=2012-01-01T00:00:00-05:00"
-			+ "&callback=?"
+			"http://www.google.com/calendar/feeds/" +
+			"nh76o8dgn9d86b7n3p3uofg1q0%40group.calendar.google.com" +
+			"/public/full?alt=json-in-script" +
+//			"&ctz=Etc/UTC" +
+			"&ctz=America/New_York" +
+			"&orderby=starttime" +
+			"&sortorder=ascending" +
+			"&max-results=10000" +
+			"&start-min=2012-01-01T00:00:00-05:00" +
+			"&callback=?"
 		});
 		pendingUpdates.push({name:"unofficial", url:
-			"https://www.google.com/calendar/feeds/"
-			+ "6r0c1f3ltnhdlpbtpql79colos%40group.calendar.google.com"
-			+ "/public/full?alt=json-in-script"
-//			+ "&ctz=Etc/UTC"
-			+ "&ctz=America/New_York"
-			+ "&orderby=starttime"
-			+ "&sortorder=ascending"
-			+ "&max-results=10000"
-			+ "&start-min=2012-01-01T00:00:00-05:00"
-			+ "&callback=?"
+			"https://www.google.com/calendar/feeds/" +
+			"6r0c1f3ltnhdlpbtpql79colos%40group.calendar.google.com" +
+			"/public/full?alt=json-in-script" +
+//			"&ctz=Etc/UTC" +
+			"&ctz=America/New_York" +
+			"&orderby=starttime" +
+			"&sortorder=ascending" +
+			"&max-results=10000" +
+			"&start-min=2012-01-01T00:00:00-05:00" +
+			"&callback=?"
 		});
 		handlePendingUpdates();
 	}
@@ -403,7 +404,6 @@
 		if (show) {
 			refresh();
 			updateDataIfOnline();
-		} else {
 		}
 		return true;
 	}
@@ -527,7 +527,7 @@
 		}
 		checkForReminders();
 		setTimeout(doUpdates, (60 * 1000));
-	}
+	};
 	
 	$(document).ready(function() {
 		var images = [

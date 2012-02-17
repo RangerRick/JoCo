@@ -7,12 +7,12 @@ function Favorites() {
 	this.save = function() {
 		save('favorites', this.contents);
 		return true;
-	}
+	};
 	this.add = function(id) {
 		log.debug("Favorites.add: " + id);
 		this.contents.push(id);
 		return true;
-	}
+	};
 	this.remove = function(id) {
 		log.debug("Favorites.remove: " + id);
 		for (var i = 0; i < this.contents.length; i++) {
@@ -22,7 +22,7 @@ function Favorites() {
 			}
 		}
 		return true;
-	}
+	};
 	this.contains = function(id) {
 		for (var i = 0; i < this.contents.length; i++) {
 			if (this.contents[i] == id) {
@@ -30,5 +30,5 @@ function Favorites() {
 			}
 		}
 		return false;
-	}
+	};
 }

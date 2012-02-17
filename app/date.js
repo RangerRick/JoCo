@@ -8,7 +8,7 @@ function formatTime(d, doSeconds) {
 	}
 	var ret = hour + ':' + String('0' + d.getMinutes()).slice(-2);
 	
-	if (doSeconds != undefined && doSeconds == true) {
+	if (doSeconds === true) {
 		ret += ':' + String('0' + d.getSeconds()).slice(-2);
 	}
 
@@ -38,12 +38,10 @@ function getDateFromString(dateTime) {
 	return new Date(dateParts[0], dateParts[1] - 1, dateParts[2], timeParts[0], timeParts[1], 0, 0);
 }
 
+function padNumber(num) {
+	return (String('0' + num).slice(-2));
+}
+
 function getStringFromDate(d) {
-	return d.getFullYear() + '-'
-		+ String('0' + (d.getMonth() + 1)).slice(-2)
-		+ '-' + String('0' + d.getDate()).slice(-2)
-		+ 'T' + String('0' + d.getHours()).slice(-2)
-		+ ':' + String('0' + d.getMinutes()).slice(-2)
-		+ ':' + String('0' + d.getSeconds()).slice(-2)
-		+ '-00:00';
+	return d.getFullYear() + '-' + padNumber(d.getMonth() + 1) + '-' + padNumber(d.getDate()) + 'T' + padNumber(d.getHours()) + ':' + padNumber(d.getMinutes()) + ':' + padNumber(d.getSeconds()) + '-00:00';
 }
