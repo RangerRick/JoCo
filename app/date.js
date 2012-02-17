@@ -40,7 +40,7 @@ function getDateFromString(dateTime) {
 
 function getStringFromDate(d) {
 	return d.getFullYear() + '-'
-		+ String('0' + d.getMonth()).slice(-2)
+		+ String('0' + d.getMonth() + 1).slice(-2)
 		+ '-' + String('0' + d.getDate()).slice(-2)
 		+ 'T' + String('0' + d.getHours()).slice(-2)
 		+ ':' + String('0' + d.getMinutes()).slice(-2)
