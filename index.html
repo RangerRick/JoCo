@@ -45,7 +45,7 @@
 	<script type="text/javascript">
 
 	var storageVersion = 4;
-	var includeTestEvent = false;
+	var includeTestEvent = true;
 	var favorites = new Favorites();
 	var jocoOnline = false;
 	var normalTheme = 'c';
@@ -528,7 +528,7 @@
 		checkForReminders();
 		setTimeout(doUpdates, (60 * 1000));
 	}
-
+	
 	$(document).ready(function() {
 		var images = [
 			"westerdam-11-sports.gif",
@@ -560,7 +560,8 @@
 		if (getCurrentPage() == 'alert') {
 			$.mobile.changePage("#menu");
 		}
-		doUpdates();
+		
+		setTimeout(doUpdates, (60 * 1000));
 	});
 	</script>
 </head> 
