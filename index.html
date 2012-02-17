@@ -125,10 +125,10 @@
 					// alarm 15 minutes before the event
 					alarmDate = entry.start.add(-15).minutes();
 
-					log.trace("alarm time = " + alarmDate);
-					log.trace("event time = " + entry.start);
+					log.trace("alarm = " + alarmDate);
+					log.trace("event = " + entry.start);
 
-					if (alarmTime.between(lastCheck, now)) {
+					if (alarmDate.between(lastCheck, now)) {
 						log.info("BEEP!");
 
 						var title = formatTime(entry.start) + ': ' + entry.title;
