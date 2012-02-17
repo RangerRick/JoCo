@@ -24,25 +24,15 @@ images/westerdam-10-observation.gif
 images/westerdam-11-sports.gif
 
 # 3rd-party libraries
-datejs/src/core.js
-datejs/src/globalization/en-US.js
-datejs/src/parser.js
-datejs/src/sugarpak.js
-jquery/jquery-1.7.1.js
-jquery/jquery-1.7.1.min.js
-jquery.mobile/images/ajax-loader.png
-jquery.mobile/images/icons-18-black.png
-jquery.mobile/images/icons-18-white.png
-jquery.mobile/images/icons-36-black.png
-jquery.mobile/images/icons-36-white.png
-jquery.mobile/jquery.mobile-1.0.1.css
-jquery.mobile/jquery.mobile-1.0.1.js
-jquery.mobile/jquery.mobile-1.0.1.min.css
-jquery.mobile/jquery.mobile-1.0.1.min.js
-jquery.mobile/jquery.mobile.structure-1.0.1.css
-jquery.mobile/jquery.mobile.structure-1.0.1.min.css
-jquery.Storage/jquery.Storage.js
-log4javascript/log4javascript.js
+3rdparty/datejs/core.js
+3rdparty/datejs/date.js
+3rdparty/datejs/extras.js
+3rdparty/datejs/parser.js
+3rdparty/datejs/sugarpak.js
+3rdparty/datejs/time.js
+3rdparty/datejs/globalization/en-US.js
+3rdparty/jquery.Storage.js
+3rdparty/log4javascript.js
 
 FALLBACK:
 online.html offline.html

@@ -1,39 +1,42 @@
-function get(name) {
+function get(name, defaultValue) {
 	try {
-//		if (phoneGapAvailable()) {
-			val = window.localStorage.getItem(name);
-			if (val) {
-				return window.JSON.parse(window.localStorage.getItem(name), function(key, value) {
-					if (key == 'start' || key == 'end') {
-						value = getDateFromString(value.replace('.000', ''));
+		val = window.localStorage.getItem(name);
+		if (val != undefined && val != 'undefined') {
+			return window.JSON.parse(val, function(key, value) {
+				if (value == 'undefined') {
+					return undefined;
+				}
+				if (key == 'start' || key == 'end') {
+					try {
+						value = new Date(value);
+					} catch (dateException) {
+						log.warn("failed to parse date", dateException);
+						value = Date.parse(value);
 					}
-					return value;
-				});
-			}
-//		} else {
-//			return $.Storage.loadItem(name);
-//		}
+				}
+				return value;
+			});
+		}
 	} catch (e) {
 		log.warn("failed to get " + name, e);
 	}
-	return undefined;
+	return defaultValue;
 }
 	
 function save(name, obj) {
 	if (obj == undefined) {
-//		log.trace("removing item " + name);
-//		if (phoneGapAvalable()) {
-			return window.localStorage.removeItem(name);
-//		} else {
-//			return $.Storage.deleteItem(name);
-//		}
+		return window.localStorage.removeItem(name);
 	}
-//	if (phoneGapAvailable()) {
-		var stringify = window.JSON.stringify(obj);
-//		log.trace("saving " + name);
-		return window.localStorage.setItem(name, stringify);
-//	} else {
-//		return $.Storage.saveItem(name, obj);
-//	}
+
+	var stringify = window.JSON.stringify(obj, function(key, value) {
+		if (key == 'start' || key == 'end') {
+			if (!(value instanceof Date)) {
+				value = new Date(value);
+			}
+			value = value.getTime();
+		}
+		return value;
+	});
+	return window.localStorage.setItem(name, stringify);
 }
 

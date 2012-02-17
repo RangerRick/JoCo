@@ -1,6 +1,6 @@
 var cache = window.applicationCache;
 
-if (typeof cache != 'undefined') {
+if (cache != undefined) {
   cache.addEventListener("cached", function () {
       log.debug("All resources for this web app have now been downloaded. You can run this application while not connected to the internet");
   }, false);

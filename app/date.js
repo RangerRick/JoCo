@@ -24,8 +24,11 @@ function formatDate(d) {
 	return days[d.getDay()] + ', ' + months[d.getMonth()] + ' ' + d.getDate();
 }
 
-function getDateFromString(dateTimeString) {
-	var dateTimeParts = dateTimeString.split('T');
+function getDateFromString(dateTime) {
+	if (dateTime instanceof Date) {
+		return new Date(dateTime.getFullYear(), dateTime.getMonth(), dateTime.getDate(), dateTime.getHours(), dateTime.getMinutes(), 0, 0);
+	}
+	var dateTimeParts = dateTime.split('T');
 	var dateParts = dateTimeParts[0].split('-');
 	var timeParts = dateTimeParts[1].split(':');
 	
@@ -33,4 +36,14 @@ function getDateFromString(dateTimeString) {
 	// console.log('hours = ' + timeParts[0] + ', minutes = ' + timeParts[1]);
 	
 	return new Date(dateParts[0], dateParts[1] - 1, dateParts[2], timeParts[0], timeParts[1], 0, 0);
+}
+
+function getStringFromDate(dateTime) {
+	return d.getFullYear() + '-'
+		+ String('0' + d.getMonth()).slice(-2)
+		+ '-' + String('0' + d.getDate()).slice(-2)
+		+ 'T' + String('0' + d.getHours()).slice(-2)
+		+ ':' + String('0' + d.getMinutes()).slice(-2)
+		+ ':' + String('0' + d.getSeconds()).slice(-2)
+		+ '-00:00';
 }
