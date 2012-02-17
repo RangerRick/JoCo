@@ -45,6 +45,7 @@
 	<script src="app/favorites.js"></script>
 	<script type="text/javascript">
 
+	var storageVersion = 2;
 	var debug = true;
 	var favorites = new Favorites();
 	var jocoOnline = false;
@@ -543,6 +544,13 @@
 		$.each(images, function(i, image) {
 			document.createElement('img').src = "images/" + image;
 		});
+
+		var currentStorageVersion = get('storageVersion');
+		if (currentStorageVersion != storageVersion) {
+			log.debug("current storage version (" + currentStorageVersion + ") does not match API storage version (" + storageVersion + ") -- resetting");
+			window.localStorage.clear();
+			save('storageVersion', storageVersion);
+		}
 
 		$.mobile.defaultPageTransition = 'none';
 		setType('official');
