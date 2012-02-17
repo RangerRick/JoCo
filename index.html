@@ -106,8 +106,8 @@
 		var lastCheck = new Date(get('lastCheck', 0));
 		now = new Date();
 
-		log.trace("lastCheck  = " + lastCheck);
-		log.trace("now        = " + now);
+		log.debug("lastCheck  = " + lastCheck);
+		log.debug("now        = " + now);
 
 		$.each(['official', 'unofficial'], function(i, type) {
 			log.debug("checking for reminders (" + type + ")");
@@ -121,15 +121,15 @@
 					log.debug('('+type+') ' + entry.title + " is a favorite.... checking for alarms");
 					// alarm 15 minutes before the event
 					startTime = getDateFromString(entry.start);
-					var alarmDate = new Date(getDateFromString(entry.start).getTime() - (60 * 1000 * 15));
+					var alarmDate = new Date(startTime.getTime() - (60 * 1000 * 15));
 
-					log.trace("alarm = " + alarmDate);
-					log.trace("event = " + entry.start);
+					log.debug("alarm = " + alarmDate);
+					log.debug("event = " + entry.start);
 
 					if (alarmDate.between(lastCheck, now)) {
 						log.info("BEEP!");
 
-						var title = formatTime(getDateFromString(entry.start)) + ': ' + entry.title;
+						var title = entry.start + ': ' + entry.title;
 						var header = title;
 						var contents = entry.contents;
 
