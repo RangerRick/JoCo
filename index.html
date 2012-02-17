@@ -45,7 +45,7 @@
 	<script type="text/javascript">
 
 	var storageVersion = 4;
-	var includeTestEvent = true;
+	var includeTestEvent = false;
 	var favorites = new Favorites();
 	var jocoOnline = false;
 	var normalTheme = 'c';
@@ -128,7 +128,7 @@
 					if (alarmDate.between(lastCheck, now)) {
 						log.info("BEEP!");
 
-						var title = formatTime(getDateFromString(entry.start)) + ': ' + entry.title;
+						var title = formatTime(getDateFromString(entry.start)) + ' - ' + entry.title;
 						var header = title;
 						var contents = entry.contents;
 
