@@ -5,6 +5,8 @@ CACHE:
 # internal app stuff
 index.html
 offline.html
+official.js
+unofficial.js
 app/appcache.js
 app/date.js
 app/favorites.js

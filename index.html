@@ -44,7 +44,8 @@
 	<script src="app/favorites.js"></script>
 	<script type="text/javascript">
 
-	var storageVersion = 4;
+	// var storageVersion = 4;
+	var storageVersion = 5;
 	var includeTestEvent = false;
 	var favorites = new Favorites();
 	var jocoOnline = false;
@@ -259,56 +260,60 @@
 		};
 	}
 
+	function processUpdate(updateName, json) {
+		log.debug("processUpdate(" + updateName + ")");
+
+		var calendarEvents = [];
+
+		if (includeTestEvent) {
+			var now = new Date();
+			var nowTime = now.getTime();
+			var calendarStart = new Date(nowTime - (nowTime % 1000) + (60 * 1000 * 17));
+			var calendarEnd   = new Date(calendarStart.getTime() + (60 * 1000 * 60));
+
+			var calendarEvent = new CalendarEvent();
+			calendarEvent.id=updateName + '-monkey';
+			calendarEvent.title = "Test Event";
+			calendarEvent.content = "This is a test event.";
+			calendarEvent.location = "Someplace";
+			calendarEvent.start = getStringFromDate(calendarStart);
+			calendarEvent.end = getStringFromDate(calendarEnd);
+			calendarEvents.push(calendarEvent);
+		}
+
+		if (json != undefined && json.feed != undefined && json.feed.entry != undefined) {
+			$.each(json.feed.entry, function(i, entry) {
+				calendarEvent = new CalendarEvent();
+
+				calendarEvent.id = entry.id['$t'];
+				calendarEvent.title = entry.title['$t'];
+				calendarEvent.content = entry.content['$t'];
+				if (entry['gd$where'] && entry['gd$where'].length > 0) {
+					calendarEvent.location = entry['gd$where'][0].valueString;
+				}
+
+				if (entry['gd$when']) {
+					calendarEvent.start = getStringFromDate(getDateFromString(entry['gd$when'][0].startTime.replace('.000', '')));
+					calendarEvent.end   = getStringFromDate(getDateFromString(entry['gd$when'][0].endTime.replace('.000', '')));
+				}
+
+				calendarEvents.push(calendarEvent);
+			});
+		}
+
+		// log.trace(window.JSON.stringify(json));
+		save(updateName, calendarEvents);
+	}
+
 	function handlePendingUpdates() {
 		if (pendingUpdates.length > 0) {
 			var update = pendingUpdates.shift();
 			if (jocoOnline) {
 				log.debug("handlePendingUpdates: " + update.name);
-				$.getJSON(update.url,
-					function(json) {
-						var calendarEvents = [];
-
-						if (includeTestEvent) {
-							var now = new Date();
-							var nowTime = now.getTime();
-							var calendarStart = new Date(nowTime - (nowTime % 1000) + (60 * 1000 * 17));
-							var calendarEnd   = new Date(calendarStart.getTime() + (60 * 1000 * 60));
-
-							var calendarEvent = new CalendarEvent();
-							calendarEvent.id=update.name + '-monkey';
-							calendarEvent.title = "Test Event";
-							calendarEvent.content = "This is a test event.";
-							calendarEvent.location = "Someplace";
-							calendarEvent.start = getStringFromDate(calendarStart);
-							calendarEvent.end = getStringFromDate(calendarEnd);
-							calendarEvents.push(calendarEvent);
-						}
-
-						if (json != undefined && json.feed != undefined && json.feed.entry != undefined) {
-							$.each(json.feed.entry, function(i, entry) {
-								calendarEvent = new CalendarEvent();
-
-								calendarEvent.id = entry.id['$t'];
-								calendarEvent.title = entry.title['$t'];
-								calendarEvent.content = entry.content['$t'];
-								if (entry['gd$where'] && entry['gd$where'].length > 0) {
-									calendarEvent.location = entry['gd$where'][0].valueString;
-								}
-
-								if (entry['gd$when']) {
-									calendarEvent.start = getStringFromDate(getDateFromString(entry['gd$when'][0].startTime.replace('.000', '')));
-									calendarEvent.end   = getStringFromDate(getDateFromString(entry['gd$when'][0].endTime.replace('.000', '')));
-								}
-
-								calendarEvents.push(calendarEvent);
-							});
-						}
-
-						// log.trace(window.JSON.stringify(json));
-						save(update.name, calendarEvents);
-						handlePendingUpdates();
-					}
-				);
+				$.getJSON(update.url, function(json) {
+					processUpdate(update.name, json);
+					handlePendingUpdates();
+				});
 			} else {
 				log.debug("handlePendingUpdates: updates needed, but we are offline");
 				handlePendingUpdates();
@@ -529,6 +534,13 @@
 		setTimeout(doUpdates, (60 * 1000));
 	};
 	
+	function addScript(file) {
+		var script = document.createElement("script");
+		script.type="text/javascript";
+		script.src=file;
+		document.body.appendChild(script);
+	}
+
 	$(document).ready(function() {
 		var images = [
 			"westerdam-11-sports.gif",
@@ -553,6 +565,9 @@
 			log.debug("current storage version (" + currentStorageVersion + ") does not match API storage version (" + storageVersion + ") -- resetting");
 			window.localStorage.clear();
 			save('storageVersion', storageVersion);
+			
+			addScript("official.js");
+			addScript("unofficial.js");
 		}
 
 		$.mobile.defaultPageTransition = 'none';
