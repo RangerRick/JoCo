@@ -34,6 +34,7 @@
 	<script type="text/javascript" charset="utf-8" src="phonegap.js"></script>
 	<script src="jquery/jquery-1.7.1.min.js"></script>
 	<script src="jquery.mobile/jquery.mobile-1.0.1.min.js"></script>
+	<script src="3rdparty/jquery.asyncqueue.js"></script>
 	<script src="3rdparty/jquery.Storage.js"></script>
 	<script src="3rdparty/datejs/core.js"></script>
 	<script src="3rdparty/datejs/globalization/en-US.js"></script>
@@ -41,8 +42,23 @@
 	<script src="app/appcache.js"></script>
 	<script src="app/date.js"></script>
 	<script src="app/storage.js"></script>
+	<script src="app/dao/calendarevent.js"></script>
 	<script src="app/favorites.js"></script>
 	<script type="text/javascript">
+
+	var eventDao = new CalendarEventDao();
+
+	eventDao.save(
+		new CalendarEvent('8', 'creator', 'title', '2012-02-02T04:14:76', '2012-02-03T04:14:76', 'location', 'content'),
+		function() {
+			log.debug("save success called");
+			eventDao.findAllEvents(function(events) {
+				for (i = 0; i < events.length; i++) {
+					log.debug("event = " + events[i].title);
+				}
+			});
+		}
+	);
 
 	// var storageVersion = 4;
 	var storageVersion = 5;
@@ -245,19 +261,6 @@
 			favorites.save();
 			$('#calendar-list').listview('refresh');
 		}
-	}
-
-	function CalendarEvent() {
-		this.id       = undefined;
-		this.title    = undefined;
-		this.start    = undefined;
-		this.end      = undefined;
-		this.location = undefined;
-		this.content  = undefined;
-		
-		this.toString = function() {
-			return this.title + ' (' + this.start + ' to ' + this.end + ')';
-		};
 	}
 
 	function processUpdate(updateName, json) {
