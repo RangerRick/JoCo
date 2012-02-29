@@ -11,6 +11,7 @@ app/appcache.js
 app/date.js
 app/favorites.js
 app/storage.js
+app/dao/calendarevent.js
 
 # images
 images/icon-ship-512.png
@@ -35,6 +36,7 @@ images/westerdam-11-sports.gif
 3rdparty/datejs/time.js
 3rdparty/datejs/globalization/en-US.js
 3rdparty/jquery.Storage.js
+3rdparty/jquery.asyncqueue.js
 3rdparty/log4javascript.js
 
 FALLBACK:

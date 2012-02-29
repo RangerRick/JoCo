@@ -1,6 +1,3 @@
-var _q = new $.AsyncQueue();
-var _db = undefined;
-
 function CalendarEvent(id, creator, title, start, end, location, content) {
 	this.id       = id;
 	this.creator  = creator;
@@ -15,49 +12,62 @@ function CalendarEvent(id, creator, title, start, end, location, content) {
 	};
 }
 
-_prepareDatabase = function(errorCallback) {
-	if (!errorCallback) {
-		errorCallback = function(err) {
-			log.error(err);
-		};
-	}
-
-	log.debug("opening database");
-	var db = window.openDatabase(
-		'eventmonkey',
-		'1.0',
-		'Event Monkey Database',
-		1*1024*1024
-	);
-
-	_q.add(function(q) {
-		log.debug("creating database");
-		db.transaction(function(tx) {
-			tx.executeSql('DROP TABLE IF EXISTS events');
-			tx.executeSql('CREATE TABLE IF NOT EXISTS events (' +
-				'id TEXT UNIQUE NOT NULL, ' +
-				'creator TEXT, ' +
-				'title TEXT NOT NULL, ' +
-				'start TEXT NOT NULL, ' +
-				'end TEXT, ' +
-				'location TEXT, ' +
-				'content TEXT NOT NULL ' +
-				')'
-			);
-			tx.executeSql("INSERT INTO EVENTS (id, title, start, end, content) " +
-				"VALUES ('1', 'Test Event', '2010-01-01T04:30:00', '2012-01-01T00:00:00', 'Content!')"
-			);
-		});
-	});
-	
-	_q.run();
-
-	return db;
-};
-
 var CalendarEventDao = function(callback) {
-	this.pending = [];
-		
+	var queue, database;
+
+	this._prepareDatabase = function() {
+		log.debug("opening database");
+
+		queue.pause();
+
+		var db = window.openDatabase(
+			'eventmonkey',
+			'1.0',
+			'Event Monkey Database',
+			1*1024*1024
+		);
+
+		queue.add(function(q) {
+			log.debug("creating database");
+
+			var onSuccess = function(tx, results) {
+				log.debug("_prepareDatabase: got " + results.rows.length + " results (" + results + ")");
+				q.run();
+			};
+
+			var onFailure = function(tx, err) {
+				errorCallback("failed prepareDatabase call", err);
+				q.failure("failed prepareDatabase call", err);
+			};
+
+			q.pause();
+
+			db.transaction(function(tx) {
+				tx.executeSql('DROP TABLE IF EXISTS events');
+				tx.executeSql('CREATE TABLE IF NOT EXISTS events (' +
+					'id TEXT UNIQUE NOT NULL, ' +
+					'creator TEXT, ' +
+					'title TEXT NOT NULL, ' +
+					'start TEXT NOT NULL, ' +
+					'end TEXT, ' +
+					'location TEXT, ' +
+					'content TEXT NOT NULL ' +
+					')'
+				);
+				tx.executeSql("INSERT INTO EVENTS (id, title, start, end, content) " +
+					"VALUES ('1', 'Test Event', '2010-01-01T04:30:00', '2012-01-01T00:00:00', 'Content!')",
+					[],
+					onSuccess,
+					onFailure
+				);
+			});
+		});
+
+		queue.run();
+
+		return db;
+	};
+
 	this.errorCallback = function(message, err) {
 		if (err === undefined) {
 			log.error(message);
@@ -67,14 +77,15 @@ var CalendarEventDao = function(callback) {
 	};
 
 	this.save = function(calendarEvent, successCallback) {
-		var checkIdExists = function(q, data) {
+		var checkIdExists = function(q) {
+			var data = q.lastCallbackData();
 			log.debug("_idExists(q, " + calendarEvent.id + ")");
 
 			var errorCallback = this.errorCallback;
 
 			var onSuccess = function(tx, results) {
 				log.debug("_idExists: got " + results.rows.length + " results (" + results + ")");
-				q.storeData(results);
+				q.storeData(results.rows);
 				q.run();
 			};
 
@@ -85,7 +96,7 @@ var CalendarEventDao = function(callback) {
 
 			q.pause();
 
-			_db.readTransaction(function(tx) {
+			database.readTransaction(function(tx) {
 				tx.executeSql(
 					"SELECT id FROM events WHERE id = ?",
 					[calendarEvent.id],
@@ -95,8 +106,9 @@ var CalendarEventDao = function(callback) {
 			});
 		};
 
-		var saveResults = function(q, results) {
-			log.debug("_save(q, " + results + ")");
+		var saveResults = function(q) {
+			var rows = q.lastCallbackData();
+			log.debug("_save(q), rows = " + rows + ")");
 
 			var errorCallback = this.errorCallback;
 
@@ -112,10 +124,10 @@ var CalendarEventDao = function(callback) {
 
 			q.pause();
 
-			var rows = results.rows.length;
-			log.debug("got " + rows + " rows");
-			_db.transaction(function(tx) {
-				if (rows == 0) {
+			var numRows = rows.length;
+			log.debug("got " + numRows + " rows");
+			database.transaction(function(tx) {
+				if (numRows == 0) {
 					t.executeSql(
 						"INSERT INTO events (id, creator, title, start, end, location, content) VALUES (?, ?, ?, ?, ?, ?, ?)",
 						[calendarEvent.id, calendarEvent.creator, calendarEvent.title, calendarEvent.start, calendarEvent.end, calendarEvent.location, calendarEvent.content],
@@ -135,15 +147,16 @@ var CalendarEventDao = function(callback) {
 
 		log.debug("saving " + calendarEvent.toString());
 
-		_q.pause();
+		queue.pause();
 
-		_q.add(checkIdExists);
-		_q.add(saveResults);
-		_q.add(function(q, results) {
+		queue.add(checkIdExists);
+		queue.add(saveResults);
+		queue.add(function(q) {
+			var results = q.lastCallbackData();
 			log.debug("results = " + results);
 		});
 
-		_q.run();
+		queue.run();
 	};
 	
 	this.findAllEvents = function(callback, where, orderBy) {
@@ -151,7 +164,7 @@ var CalendarEventDao = function(callback) {
 
 		var errorCallback = this.errorCallback;
 
-		_db.transaction(function(tx) {
+		database.transaction(function(tx) {
 			var selectStatement = "SELECT id, creator, title, start, end, location, content FROM events";
 			if (where) {
 				selectStatement += " WHERE " + where;
@@ -179,5 +192,6 @@ var CalendarEventDao = function(callback) {
 		});
 	};
 	
-	_db = _prepareDatabase();
+	queue    = new $.AsyncQueue();
+	database = this._prepareDatabase();
 }
