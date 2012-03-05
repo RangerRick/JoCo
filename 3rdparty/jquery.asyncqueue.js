@@ -37,10 +37,12 @@
 
         this.storeData = function(dataObject) {
             lastCallbackData = dataObject;
+			log.debug("lastCallbackData set to: " + lastCallbackData);
             return this;
         }
 
         this.lastCallbackData = function () {
+			log.debug("returning lastCallbackData = " + lastCallbackData);
             return lastCallbackData;
         }
 

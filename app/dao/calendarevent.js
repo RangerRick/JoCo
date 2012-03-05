@@ -13,7 +13,7 @@ function CalendarEvent(id, creator, title, start, end, location, content) {
 }
 
 var CalendarEventDao = function(callback) {
-	var queue, database;
+	var queue, database, that = this;
 
 	this._prepareDatabase = function() {
 		log.debug("opening database");
@@ -79,13 +79,13 @@ var CalendarEventDao = function(callback) {
 	this.save = function(calendarEvent, successCallback) {
 		var checkIdExists = function(q) {
 			var data = q.lastCallbackData();
-			log.debug("_idExists(q, " + calendarEvent.id + ")");
+			log.debug("checkIdExists(q, " + calendarEvent.id + ")");
 
 			var errorCallback = this.errorCallback;
 
 			var onSuccess = function(tx, results) {
 				log.debug("_idExists: got " + results.rows.length + " results (" + results + ")");
-				q.storeData(results.rows);
+				q.storeData(results);
 				q.run();
 			};
 
@@ -107,9 +107,10 @@ var CalendarEventDao = function(callback) {
 		};
 
 		var saveResults = function(q) {
-			var rows = q.lastCallbackData();
-			log.debug("_save(q), rows = " + rows + ")");
+			var results = q.lastCallbackData();
+			log.debug("_save(q), results = " + results + ")");
 
+			var rows = results.rows;
 			var errorCallback = this.errorCallback;
 
 			var onSuccess = function(tx, results) {
@@ -152,8 +153,7 @@ var CalendarEventDao = function(callback) {
 		queue.add(checkIdExists);
 		queue.add(saveResults);
 		queue.add(function(q) {
-			var results = q.lastCallbackData();
-			log.debug("results = " + results);
+			successCallback();
 		});
 
 		queue.run();
@@ -164,34 +164,44 @@ var CalendarEventDao = function(callback) {
 
 		var errorCallback = this.errorCallback;
 
-		database.transaction(function(tx) {
-			var selectStatement = "SELECT id, creator, title, start, end, location, content FROM events";
-			if (where) {
-				selectStatement += " WHERE " + where;
-			}
-			if (orderBy) {
-				selectStatement += " ORDER BY " + orderBy;
-			} else {
-				selectStatement += " ORDER BY start ASC, end ASC, title ASC";
-			}
-			tx.executeSql(
-				selectStatement,
-				[],
-				function(tx, results) {
-					log.debug("got " + results.rows.length + " results");
+		queue.pause();
+		
+		queue.add(function(q) {
+			database.transaction(function(tx) {
+				var selectStatement = "SELECT id, creator, title, start, end, location, content FROM events";
+				if (where) {
+					selectStatement += " WHERE " + where;
+				}
+				if (orderBy) {
+					selectStatement += " ORDER BY " + orderBy;
+				} else {
+					selectStatement += " ORDER BY start ASC, end ASC, title ASC";
+				}
+				tx.executeSql(
+					selectStatement,
+					[],
+					function(tx, results) {
+						log.debug("got " + results.rows.length + " results");
 
-					var events = [];
-					for (i = 0; i < results.rows.length; i++) {
-						var item = results.rows.item(i);
-						events.push(new CalendarEvent(item.id, item.creator, item.title, item.start, item.end, item.location, item.content));
-					}
-					callback(events);
-				},
-				this.errorCallback
-			);
+						var events = [];
+						for (i = 0; i < results.rows.length; i++) {
+							var item = results.rows.item(i);
+							events.push(new CalendarEvent(item.id, item.creator, item.title, item.start, item.end, item.location, item.content));
+						}
+						callback(events);
+					},
+					errorCallback
+				);
+			});
 		});
+		
+		queue.run();
 	};
 	
 	queue    = new $.AsyncQueue();
+	queue.pause();
+
 	database = this._prepareDatabase();
+	
+	queue.run();
 }

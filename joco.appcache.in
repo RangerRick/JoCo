@@ -7,11 +7,17 @@ index.html
 offline.html
 official.js
 unofficial.js
+app/app.js
 app/appcache.js
+app/calendarSource.js
+app/dao/calendarevent.js
+app/dao.js
 app/date.js
 app/favorites.js
+app/main.js
 app/storage.js
-app/dao/calendarevent.js
+
+app/domReady.js
 
 # images
 images/icon-ship-512.png
@@ -38,6 +44,7 @@ images/westerdam-11-sports.gif
 3rdparty/jquery.Storage.js
 3rdparty/jquery.asyncqueue.js
 3rdparty/log4javascript.js
+3rdparty/require.js
 
 FALLBACK:
 online.html offline.html
