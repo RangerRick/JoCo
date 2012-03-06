@@ -1,6 +1,6 @@
 var jocoOnline = false;
 
-define(['./dao'], function(dao) {
+define(function() {
 	var pendingUpdates = [];
 
 	var _updateData = function(obj) {
@@ -16,7 +16,9 @@ define(['./dao'], function(dao) {
 	};
 	
 
-	return {
+	var self;
+	
+	self = {
 		toString: function() {
 			return "[calendarSource]";
 		},
@@ -56,11 +58,11 @@ define(['./dao'], function(dao) {
 					type: "GET",
 					url: "online.html",
 					success: function(data, status) {
-						_updateData(me)
+						_updateData(self);
 					},
 					error: function (req, status, ex) {
 						if (jocoOnline) {
-							_updateData(me);
+							_updateData(self);
 							return;
 						}
 						log.warn("Error: request = " + window.JSON.stringify(req) + ", status = " + status, ex);
@@ -69,13 +71,15 @@ define(['./dao'], function(dao) {
 						// going to treat it as if we're offline.
 						// Note: This might not be totally correct if the error is because the
 						// manifest is ill-formed.
-						_refresh(me);
+						_refresh(self);
 					}
 				});
 			} else {
 				log.debug("navigator.onLine == false, skipping update");
-				_refresh(me);
+				_refresh(self);
 			}
 		}
 	};
+	
+	return self;
 });

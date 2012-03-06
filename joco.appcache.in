@@ -15,7 +15,9 @@ app/dao.js
 app/date.js
 app/favorites.js
 app/main.js
+app/paxparser.js
 app/storage.js
+app/updater.js
 
 app/domReady.js
 
