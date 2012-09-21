@@ -37,6 +37,23 @@ images/westerdam-11-sports.gif
 3rdparty/jquery.Storage.js
 3rdparty/log4javascript.js
 
+# JQuery
+jquery/jquery-1.7.2.js
+jquery/jquery-1.7.2.min.js
+jquery.mobile/images/ajax-loader.gif
+jquery.mobile/images/icons-18-black.png
+jquery.mobile/images/icons-18-white.png
+jquery.mobile/images/icons-36-black.png
+jquery.mobile/images/icons-36-white.png
+jquery.mobile/jquery.mobile-1.2.0-rc.1.css
+jquery.mobile/jquery.mobile-1.2.0-rc.1.js
+jquery.mobile/jquery.mobile-1.2.0-rc.1.min.css
+jquery.mobile/jquery.mobile-1.2.0-rc.1.min.js
+jquery.mobile/jquery.mobile.structure-1.2.0-rc.1.css
+jquery.mobile/jquery.mobile.structure-1.2.0-rc.1.min.css
+jquery.mobile/jquery.mobile.theme-1.2.0-rc.1.css
+jquery.mobile/jquery.mobile.theme-1.2.0-rc.1.min.css
+
 FALLBACK:
 online.html offline.html
 
